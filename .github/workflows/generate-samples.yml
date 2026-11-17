@@ -1,0 +1,218 @@
+# Second stage of the pipeline (samples/README.md): when the .proto files
+# change, regenerate the language bindings in samples/generated/ and the shared
+# data in samples/data/, build and test every language, and open (or update) a
+# pull request. Design: docs/plans/samples-plan.md.
+name: generate-samples
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Generate and test, but do not open a pull request
+        type: boolean
+        default: false
+  push:
+    # On main this opens the update PR; on any other branch it is a dry run.
+    paths:
+      - proto/**
+      - samples/**
+      - .github/workflows/generate-samples.yml
+  pull_request:
+    paths:
+      - proto/**
+      - samples/**
+      - .github/workflows/generate-samples.yml
+
+permissions:
+  contents: read
+
+env:
+  PROTOC_VERSION: "36.2"
+  # sha256 of protoc-36.2-linux-x86_64.zip from the v36.2 GitHub release.
+  PROTOC_SHA256: 121f6c7afe1d4d0e3ea6aab9432038599250134cbf4474cb1167d2c7decd4278
+  PROTOC_GEN_GO_VERSION: v1.36.12
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    outputs:
+      changed: ${{ steps.diff.outputs.changed }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install protoc ${{ env.PROTOC_VERSION }}
+        run: |
+          curl -sSfL -o "$RUNNER_TEMP/protoc.zip" \
+            "https://github.com/protocolbuffers/protobuf/releases/download/v${PROTOC_VERSION}/protoc-${PROTOC_VERSION}-linux-x86_64.zip"
+          echo "${PROTOC_SHA256}  $RUNNER_TEMP/protoc.zip" | sha256sum -c -
+          unzip -q "$RUNNER_TEMP/protoc.zip" -d "$RUNNER_TEMP/protoc"
+          echo "$RUNNER_TEMP/protoc/bin" >> "$GITHUB_PATH"
+      - uses: actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5 # v7.1.0
+        with:
+          go-version-file: samples/go.mod
+          cache-dependency-path: samples/go.sum
+      - run: go install "google.golang.org/protobuf/cmd/protoc-gen-go@${PROTOC_GEN_GO_VERSION}"
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "26"
+          cache: npm
+          cache-dependency-path: samples/package-lock.json
+      - run: npm ci
+        working-directory: samples
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.11"
+      - run: pip install -r samples/python/requirements.txt
+      - uses: bufbuild/buf-action@37ac33d8960807670a6e9719080e885197b09cc6 # v1.7.0
+        with:
+          setup_only: true
+      - name: Generate bindings and sample data
+        run: |
+          protoc --version
+          buf generate --template samples/buf.gen.yaml
+          python samples/python/writer.py
+      - name: Did the generated code or data change?
+        id: diff
+        run: |
+          if [ -z "$(git status --porcelain -- samples/generated samples/data)" ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "Generated sample code and data are unchanged." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            git status --porcelain -- samples/generated samples/data | tee -a "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: On pull requests, committed samples must be up to date
+        if: github.event_name == 'pull_request' && steps.diff.outputs.changed == 'true'
+        run: |
+          echo "::error::samples/generated or samples/data is stale. Run the generation locally (samples/README.md) and commit."
+          exit 1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: samples-generated
+          path: |
+            samples/generated
+            samples/data
+          retention-days: 3
+
+  # Build and test every language against the freshly generated code.
+  test:
+    needs: generate
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [python, go, typescript, java, csharp, cpp]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Replace generated code and data with this run's output
+        run: rm -rf samples/generated samples/data
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: samples-generated
+          path: samples
+
+      - if: matrix.language == 'python'
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.11"
+      - if: matrix.language == 'python'
+        run: |
+          pip install -r samples/python/requirements.txt
+          python samples/python/reader.py
+          python -m pytest samples/python -v
+
+      - if: matrix.language == 'go'
+        uses: actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5 # v7.1.0
+        with:
+          go-version-file: samples/go.mod
+          cache-dependency-path: samples/go.sum
+      - if: matrix.language == 'go'
+        working-directory: samples
+        run: |
+          go vet ./...
+          go run ./go
+          go test -v ./...
+
+      - if: matrix.language == 'typescript'
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "26"
+          cache: npm
+          cache-dependency-path: samples/package-lock.json
+      - if: matrix.language == 'typescript'
+        working-directory: samples
+        run: |
+          npm ci
+          npm run typecheck
+          npm run reader
+          npm test
+
+      - if: matrix.language == 'java'
+        uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+          cache-dependency-path: samples/java/pom.xml
+      - if: matrix.language == 'java'
+        working-directory: samples/java
+        run: mvn -B test exec:java
+
+      - if: matrix.language == 'csharp'
+        uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73 # v6.1.0
+        with:
+          dotnet-version: "10.0.x"
+      - if: matrix.language == 'csharp'
+        working-directory: samples/csharp
+        run: |
+          dotnet run --project Reader
+          dotnet test --project Tests
+
+      - if: matrix.language == 'cpp'
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          # protobuf 36.2 and GoogleTest are built from source; keep the build tree.
+          path: samples/cpp/build
+          key: cpp-build-${{ runner.os }}-${{ hashFiles('samples/cpp/CMakeLists.txt') }}
+      - if: matrix.language == 'cpp'
+        working-directory: samples/cpp
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+          cmake --build build -j "$(nproc)"
+          ctest --test-dir build --output-on-failure
+
+  # Only this job can write, and only on main.
+  pull-request:
+    needs: [generate, test]
+    if: >-
+      needs.generate.outputs.changed == 'true' &&
+      github.event_name != 'pull_request' &&
+      github.ref == 'refs/heads/main' &&
+      inputs.dry_run != true
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    concurrency:
+      group: generate-samples-main
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Replace generated code and data with this run's output
+        run: rm -rf samples/generated samples/data
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: samples-generated
+          path: samples
+      - uses: peter-evans/create-pull-request@3ffccacd46053766916f087ce41d627c0b8cf2d1 # v8.1.3
+        with:
+          branch: generator/samples-update
+          delete-branch: true
+          add-paths: |
+            samples/generated/
+            samples/data/
+          commit-message: Regenerate sample bindings and data
+          title: Regenerate sample bindings and data
+          body: |
+            The `.proto` files changed, so `generate-samples` regenerated the bindings in
+            `samples/generated/` and the shared data in `samples/data/`. All six languages
+            built and passed their tests in run ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}.
