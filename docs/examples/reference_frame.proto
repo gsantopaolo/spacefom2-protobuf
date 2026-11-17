@@ -1,3 +1,5 @@
+// Derived from the SISO-STD-018-2020 (SpaceFOM) FOM modules.
+// Reprinted with permission from SISO Inc.
 syntax = "proto3";
 package siso.spacefom.v1;
 

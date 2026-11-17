@@ -2,6 +2,16 @@
 
 Companion to the [one-page pitch](../proposal/pitch.md) and the [draft PCR](../proposal/pcr-draft.md). Every datatype, field name and encoding below was checked against SISO-STD-018-2020 and the SpaceFOM 1.0 FOM XML; see [verification](verification.md).
 
+## Contents
+
+- [Where it fits](#where-it-fits)
+- [Encoding today](#encoding-today)
+- [Mapping](#mapping)
+- [Example output](#example-output)
+- [SpaceFOM 2.0 changes the generator must follow](#spacefom-20-changes-the-generator-must-follow)
+- [Open questions for the PDG](#open-questions-for-the-pdg)
+- [References](#references)
+
 ## Where it fits
 
 ![HLA stays inside the federation; Protobuf carries SpaceFOM data out](images/bridge-architecture.svg)
