@@ -317,8 +317,17 @@ export declare type DynamicalEntity = Message<"siso.spacefom.v1.DynamicalEntity"
    * inertia with respect to the coordinate axes of the DynamicalEntity's body
    * frame
    *
-   * InertiaMatrix: 3x3, 9 elements row-wise; MassMomentOfInertia: kilogram
-   * meter squared (kg*m^2)
+   * InertiaMatrix: A 3x3 matrix that specifies the mass inertia matrix of a
+   * body about some coordinate axes. The nine elements of the matrix are stored
+   * row-wise, namely: Ixx, Ixy, Ixz, Iyx, Iyy, Iyz, Izx, Izy, Izz. The
+   * off-diagonal components Iij (i!=j) are the so-called 'negative integrals'.
+   * This means that the elements in this inertia matrix satisfy the equation
+   * H=Iw. Where H is the angular momentum vector, I is the inertia matrix and w
+   * is the angular velocity vector. This data type does not specify the
+   * coordinate axes about which the moments are calculated.
+   *
+   * InertiaMatrix: 3x3 as 9 elements in HLA array order; MassMomentOfInertia:
+   * kilogram meter squared (kg*m^2)
    *
    * @generated from field: repeated double inertia = 14;
    */
@@ -329,8 +338,12 @@ export declare type DynamicalEntity = Message<"siso.spacefom.v1.DynamicalEntity"
    * the InertiaMatrix. The elements in this matrix correspond directly to the
    * elements in the InteriaMatrix.
    *
-   * InertiaRateMatrix: 3x3, 9 elements row-wise; MassMomentOfInertiaRate:
-   * kilogram meter squared per second (kg*m^2/s)
+   * InertiaRateMatrix: A 3x3 matrix that specifies the time rate of change of
+   * the parameters in the InertiaMatrix. The elements in this matrix correspond
+   * directly to the elements in the InteriaMatrix.
+   *
+   * InertiaRateMatrix: 3x3 as 9 elements in HLA array order;
+   * MassMomentOfInertiaRate: kilogram meter squared per second (kg*m^2/s)
    *
    * @generated from field: repeated double inertia_rate = 15;
    */
