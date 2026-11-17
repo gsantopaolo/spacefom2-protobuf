@@ -113,12 +113,12 @@ jobs:
           fi
       - name: Pull request - is the committed output acceptable?
         if: github.event_name == 'pull_request'
-        env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
         # `shell: bash` runs with -o pipefail, so a failing check is not hidden by tee.
         shell: bash
+        # HEAD is the PR merge commit and HEAD^1 the base it was merged onto, so
+        # the list holds only this PR's files even if the base branch moved on.
         run: |
-          git diff --name-only "$BASE_SHA" HEAD > "$RUNNER_TEMP/changed.txt"
+          git diff --name-only HEAD^1 HEAD > "$RUNNER_TEMP/changed.txt"
           python tools/generated_output_check.py --name proto \
             --output proto/ --output generator/field-ids.lock.json \
             --input fom/ --input generator/ --input buf.yaml \

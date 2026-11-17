@@ -23,10 +23,13 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          fetch-depth: 0
+          # The PR merge commit and its parents, for the diff below.
+          fetch-depth: 2
       - name: Test the check script
         run: sh tools/test_check_pitch_rendered.sh
       - name: PDF and Word files refreshed with pitch.md
-        env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-        run: git diff --name-only "$BASE_SHA" HEAD | sh tools/check_pitch_rendered.sh
+        # `shell: bash` runs with -o pipefail, so a failing git diff is not hidden.
+        shell: bash
+        # HEAD is the PR merge commit and HEAD^1 the base it was merged onto, so
+        # the list holds only this PR's files even if the base branch moved on.
+        run: git diff --name-only HEAD^1 HEAD | sh tools/check_pitch_rendered.sh
