@@ -53,19 +53,36 @@ If all three checks look like this, the generator works on your computer.
 
 ## Part 2: quick check of the automation on GitHub
 
-This runs a workflow by hand as a dry run. It changes nothing and opens no pull request, so you can repeat it as often as you like.
+The repository has two workflows that do the work. **generate-proto** turns the FOM XML into the `.proto` schema. **generate-samples** turns the schema into code for six languages and tests it. This part starts each one by hand to check that it runs and passes. Nothing changes and no pull request is opened.
+
+### Check 1: generate-proto (about 30 seconds)
 
 1. Open the repository on GitHub and click the **Actions** tab at the top.
 2. In the left sidebar, click **generate-proto**.
 3. Click the **Run workflow** button above the list of runs.
 4. In the form that opens, leave the branch on `main` and tick **dry_run**.
 5. Click the green **Run workflow** button in the form.
-6. After a few seconds a new run appears at the top of the list. Wait for it to finish (about 30 seconds), then click its name.
+6. After a few seconds a new run appears at the top of the list. When it finishes, click its name.
 7. A green tick means it passed. Scroll down to the summary: it says `Dry run: true`.
 
-Repeat steps 2 to 7 with **generate-samples** in step 2. That one builds and tests all six languages and takes about two minutes. Its summary says the generated sample code and data are unchanged.
+### Check 2: generate-samples (about 2 minutes)
+
+1. Still in the **Actions** tab, click **generate-samples** in the left sidebar.
+2. Click **Run workflow**, leave the branch on `main` and tick **dry_run**.
+3. Click the green **Run workflow** button in the form.
+4. When the new run finishes, click its name. It shows one job per language (cpp, csharp, go, java, python, typescript); all of them should have a green tick.
+5. Scroll down to the summary: it says `Generated sample code and data are unchanged.`
 
 These steps follow [GitHub Docs: manually running a workflow](https://docs.github.com/en/actions/how-tos/manage-workflow-runs/manually-run-a-workflow).
+
+### When to tick dry_run, and when not to
+
+A workflow opens a pull request only when all three are true: the generated output changed, the run is on `main`, and **dry_run** is not ticked. On an up-to-date `main` nothing changes, so the box makes no difference. It matters when `main` is behind its inputs, for example after an input change was merged but its bot pull request was never opened.
+
+- **Tick it** when you only want to look: the summary reports what would change, and nothing is opened or updated. This is also the safe choice for the checks above.
+- **Leave it clear** when you want the bot to act: an automatic run failed or got stuck after you merged a change, or a bot pull request was closed without being merged. The run then regenerates and opens (or updates) the pull request.
+
+You don't need either for the normal flow in Part 3: merging your change starts everything by itself.
 
 ## Part 3: full test, with the bot opening pull requests
 
