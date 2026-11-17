@@ -2,7 +2,7 @@
 
 # SpaceFOM ⇄ Protobuf
 
-**A Protocol Buffers schema for the SISO SpaceFOM datatypes, generated from the FOM modules —<br>a bridge that lets cloud, streaming, robotics and MBSE tools read space-simulation data without speaking HLA.**
+**A Protocol Buffers schema for the SISO SpaceFOM datatypes, generated from the FOM modules,<br>so cloud, streaming, robotics and MBSE tools can read space-simulation data without speaking HLA.**
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 ![Status](https://img.shields.io/badge/status-proposal-orange.svg)
@@ -17,9 +17,9 @@
 
 [SpaceFOM](https://cdn.ymaws.com/www.sisostandards.org/resource/resmgr/standards_products/siso-std-018-2020_srfom.pdf) (SISO-STD-018-2020) is the SISO standard for interoperable, HLA-based space-mission simulation, now being evolved into **SpaceFOM 2.0** by the SISO Product Development Group.
 
-Today, SpaceFOM data can only be read by software that speaks HLA. This project proposes that SpaceFOM 2.0 also publish a **`.proto` schema of its datatypes, generated mechanically from the FOM XML**, plus a reference **bridge federate** that republishes HLA updates as Protobuf on Kafka or gRPC.
+Today, SpaceFOM data can only be read by software that speaks HLA. This project proposes that SpaceFOM 2.0 also publish a `.proto` schema of its datatypes, generated mechanically from the FOM XML, plus a reference bridge federate that republishes HLA updates as Protobuf on Kafka or gRPC.
 
-HLA is not replaced: federation roles, synchronization and time management stay in HLA. The schema simply opens SpaceFOM data to everything outside the federation.
+Federation roles, synchronization and time management stay in HLA; the schema is for tools outside the federation.
 
 ## Read the proposal
 

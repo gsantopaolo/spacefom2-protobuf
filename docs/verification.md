@@ -1,6 +1,6 @@
 # Verification of technical claims
 
-Every technical statement in the proposal was checked against a primary source. This table records where. PDF links open at the cited page; XML and `.proto` links point to the exact lines in a pinned commit.
+Every technical statement in the proposal was checked against the primary source listed next to it. PDF links open at the cited page; XML and `.proto` links point to the exact lines in a pinned commit.
 
 | Claim | Source |
 |---|---|

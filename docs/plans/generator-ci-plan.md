@@ -51,11 +51,11 @@ buf.yaml
 .github/workflows/generate-proto.yml
 ```
 
-One `.proto` per FOM module, all in package `siso.spacefom.v1`, with imports between them. **[D2]** The alternative is a single `spacefom.proto`. Note that buf's default `FILE` breaking category flags moving a type from one file to another [S11], so the choice is hard to change later.
+One `.proto` per FOM module, all in package `siso.spacefom.v1`, with imports between them. **[D2]** The alternative is a single `spacefom.proto`. Buf's default `FILE` breaking category flags moving a type from one file to another [S11], so the choice is hard to change later.
 
 ## 3. Generator design
 
-- **Parsing:** use Python 3 stdlib `xml.etree.ElementTree` with a namespace map for `http://standards.ieee.org/IEEE1516-2010`. `findall()` returns elements in document order [S14], which is what makes field order deterministic. The only input is our own pinned files. The Python docs point to the XML security notes for untrusted data [S14], so `defusedxml` is optional. No third-party dependency is needed for parsing.
+- **Parsing:** use Python 3 stdlib `xml.etree.ElementTree` with a namespace map for `http://standards.ieee.org/IEEE1516-2010`. `findall()` returns elements in document order [S14], which is what makes field order deterministic. The Python docs point to the XML security notes for untrusted data [S14]. Our only input is our own pinned files, so `defusedxml` is optional. No third-party dependency is needed for parsing.
 - **Model:** build an intermediate model (types, records, arrays, enums, object classes, interactions) with name resolution across modules. The generator fails loudly on an unknown `dataType`, an unsupported encoding (anything not in the mapping table, such as variant records) or a name collision.
 - **Mapping:** follow the table in `docs/technical-overview.md`:
   - simple types become `double`, with the unit as a comment;
@@ -93,7 +93,7 @@ The strategy is a committed lock file, `generator/field-ids.lock.json`:
 1. **Unit tests** (pytest) for parsing and mapping, using small fixture XMLs.
 2. **Compile:** run `protoc` over `proto/` with `--descriptor_set_out`. I checked the flags in the local `protoc 36.2 --help`. For CI, use `python -m grpc_tools.protoc` from `grpcio-tools` [S15] so there is no separate protoc install. Alternatively, download a pinned protoc release [S16].
 3. **Golden test against `docs/examples/reference_frame.proto`:**
-   - The comparison has to be **structural, not textual.** The example's comments are hand-written ("empty for the root frame", `rad/s`), while the FOM says `radian per second (r/s)`.
+   - The comparison has to be **structural**, because a text diff would fail on comments: the example's comments are hand-written ("empty for the root frame", `rad/s`), while the FOM says `radian per second (r/s)`.
    - Compile both files to descriptor sets without `--include_source_info`, which strips comments (`protoc --help`). Then assert that every message in the example exists in the generated output with identical field names, numbers, types and labels.
    - The example compiles with `protoc` today (checked locally).
 4. **Idempotence check:** regenerate a second time, and require identical bytes and no change to the lock file.
@@ -138,7 +138,7 @@ The strategy is a committed lock file, `generator/field-ids.lock.json`:
 - Archive the **previous** `proto/` tree as it was on `main`, never the new one.
 - Archived folders are immutable: nothing is edited or deleted automatically.
 - They are excluded from buf lint and breaking (`buf.yaml` excludes `history/`) and from the golden test.
-- Note that git history already preserves every version, so `history/` is a convenience for readers browsing on GitHub. A lighter alternative is git tags plus release notes.
+- Git history already preserves every version, so `history/` is a convenience for readers browsing on GitHub. A lighter alternative is git tags plus release notes.
 
 ## 7. Getting the FOM XML into the repo, and the license question
 
@@ -156,7 +156,7 @@ The strategy is a committed lock file, `generator/field-ids.lock.json`:
 - **A. Do not vendor (recommended until clarified).** `fom/SOURCE.json` pins the TrickHLA commit (FOM files currently last changed in `1677fd0`, 2025-12-02; `datatypes.xml` at `ed05f1b`) and the sha256 of each file. CI downloads them at run time. The trigger becomes "`fom/SOURCE.json` changed".
 - **B. Vendor into `fom/`** with `NOTICE` (SISO attribution), `LICENSE-NOSA-1.3.txt`, the provenance file and a change log. Do this only after SISO and/or NASA confirm.
 
-Either way, generated files carry the SISO attribution line, and `README.md` should say they are derived works. Asking the SpaceFOM PDG which source they consider authoritative (TrickHLA or SISO's own distribution) is worth doing anyway.
+Either way, generated files carry the SISO attribution line, and `README.md` should say they are derived works. In either case, ask the SpaceFOM PDG which source they consider authoritative (TrickHLA or SISO's own distribution).
 
 ## 8. Phased tasks (rough effort)
 

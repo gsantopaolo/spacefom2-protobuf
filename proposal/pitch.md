@@ -8,23 +8,23 @@ SpaceFOM data can only be consumed by software that speaks HLA: reference frames
 
 ## Hypothesis and solution
 
-The SpaceFOM datatypes map cleanly onto Protocol Buffers: SpaceFOM 1.0 uses only four basic representations and no variant records (§8.7.2). So SpaceFOM 2.0 can publish, **alongside its FOM modules, a `.proto` schema generated mechanically from the FOM XML**:
+The SpaceFOM datatypes map cleanly onto Protocol Buffers: SpaceFOM 1.0 uses only four basic representations and no variant records (§8.7.2). SpaceFOM 2.0 could therefore publish a `.proto` schema, generated mechanically from the FOM XML, alongside its FOM modules. The proposal has three parts:
 
-- a deterministic **FOM-to-proto mapping**, as an informative annex;
-- a **reference generator**, run in CI, so the schema never drifts from the FOM (and follows 2.0 changes such as configurable time resolution);
-- a **reference bridge federate** that republishes HLA updates as Protobuf on Kafka or gRPC.
+- a deterministic FOM-to-proto mapping, as an informative annex;
+- a reference generator that runs in CI, so the schema stays in step with the FOM, including 2.0 changes such as configurable time resolution;
+- a reference bridge federate that republishes HLA updates as Protobuf on Kafka or gRPC.
 
 <p align="center"><img src="../docs/images/bridge-architecture.svg" alt="HLA stays inside the federation; Protobuf carries SpaceFOM data out" width="640"></p>
 
-HLA is not replaced: roles, synchronization and time management stay in HLA, which remains the source of truth inside the federation.
+Roles, synchronization and time management stay in HLA, which remains the source of truth inside the federation.
 
 ## Expected benefits
 
-- **Opens SpaceFOM beyond HLA**, toward MBSE, data analysis, cloud and robotics, next to the existing SMP and FMI bridges.
-- **One schema, typed code in any language**, with no hand-written decoders.
-- **Consistent with HLA 4**, which already chose Protobuf for its services layer.
-- **Ready for streaming, recording and replay** of federation runs.
-- **Additive and low risk**: no change to federates, the RTI or compliance rules.
+- SpaceFOM data becomes usable by MBSE, data-analysis, cloud and robotics tools, next to the existing SMP and FMI bridges.
+- Any language with a Protobuf code generator gets typed SpaceFOM classes, so nobody writes HLA decoders by hand.
+- It matches HLA 4, which already uses Protobuf for its services layer.
+- Federation runs can be streamed, recorded and replayed with standard tooling.
+- The change is additive: federates, the RTI and the compliance rules stay as they are.
 
 ## Implementation status
 

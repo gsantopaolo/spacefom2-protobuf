@@ -18,8 +18,8 @@ Companion to the [one-page pitch](../proposal/pitch.md) and the [draft PCR](../p
 
 The federation is untouched. Two parts are new:
 
-- **Generator:** reads the SpaceFOM FOM modules (IEEE 1516-2010 DIF XML) and writes `.proto` files. It runs in CI, so the schema is regenerated whenever the FOM changes.
-- **Bridge federate:** joins the federation like any other federate (classic HLA API, or the HLA 4 Federate Protocol), reflects SpaceFOM object updates, converts them to the generated Protobuf messages and publishes them to Kafka or gRPC.
+- Generator: reads the SpaceFOM FOM modules (IEEE 1516-2010 DIF XML) and writes `.proto` files. It runs in CI, so the schema is regenerated whenever the FOM changes.
+- Bridge federate: joins the federation like any other federate (classic HLA API, or the HLA 4 Federate Protocol), reflects SpaceFOM object updates, converts them to the generated Protobuf messages and publishes them to Kafka or gRPC.
 
 Out of scope: replacing HLA, its RTI services, federate roles, synchronization or time management.
 
@@ -107,7 +107,7 @@ From the SISO SIMposium 2026 presentation "SpaceFOM V2 … and How You Can Help"
 - HLA 4 directed interactions and the new `Reference` datatype;
 - extended object classes drawn from NASA Artemis and ESA HRAF3 experience.
 
-Because the schema is generated from the FOM, these become generator rules rather than hand edits.
+Because the schema is generated from the FOM, each of these changes is handled by a rule in the generator, and the `.proto` files are not edited by hand.
 
 ## Open questions for the PDG
 

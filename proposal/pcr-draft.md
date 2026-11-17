@@ -1,8 +1,8 @@
-# SISO Problem/Change Request (PCR) — draft
+# SISO Problem/Change Request (PCR): draft
 
 Form layout and field instructions from SISO-ADM-003, *SISO Balloted Products Development and Support Process*, Appendix A. Fields the form says the submitter leaves blank are marked "(PSG)".
 
-> **Status of this template:** the copy consulted is SISO-ADM-003-2011. Ask the SpaceFOM PSG whether a newer PCR form is in use before submitting.
+> The copy of the form consulted is SISO-ADM-003-2011. Ask the SpaceFOM PSG whether a newer PCR form is in use before submitting.
 
 ## Contents
 

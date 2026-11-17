@@ -14,7 +14,7 @@ State as of 17 November 2026. Written for the next agent or contributor picking 
 
 ## Goal
 
-Propose to the SISO SpaceFOM 2.0 Product Development Group (PDG) that SpaceFOM 2.0 publish a Protocol Buffers (`.proto`) schema of its datatypes, generated mechanically from the FOM XML modules, plus a reference bridge federate that republishes HLA data as Protobuf. HLA is not replaced; this is a bridge for tools outside the federation.
+Propose to the SISO SpaceFOM 2.0 Product Development Group (PDG) that SpaceFOM 2.0 publish a Protocol Buffers (`.proto`) schema of its datatypes, generated mechanically from the FOM XML modules, plus a reference bridge federate that republishes HLA data as Protobuf. The bridge serves tools outside the federation and does not replace HLA.
 
 The proposal goes to the PDG through its vice chair as a one-page pitch, then possibly a hearing with slides and a working demo, then a formal Product Change Request (PCR). The PDG works in two-week sprints, so speed matters.
 
@@ -23,12 +23,13 @@ The proposal goes to the PDG through its vice chair as a one-page pitch, then po
 These come from the repo owner and are mandatory.
 
 1. **Never write technical facts from memory.** Every datatype, field name, encoding, API, action version or citation must be checked against a primary source (standard, FOM XML, official docs, actual code) and cited. If something cannot be verified, say so explicitly. Record verified claims in [`docs/verification.md`](../verification.md).
-2. **All project files live in this repository folder.** Nothing only in temp folders or online documents.
+2. **All project files live in this repository folder.** Do not keep anything only in temp folders or online documents.
 3. **`reference-docs/` is never committed.** It is git-ignored and was purged from history. It holds downloaded standards, papers and private notes, locally only. Never `git add -f` it.
 4. **Plans before code.** The owner reviews and approves plans (in `docs/plans/`) before anything is built.
 5. **No NASA or SISO logos** anywhere: NASA's insignia requires written permission, SISO's logo is a trademark. Keep the "not affiliated or endorsed" disclaimer in the README.
 6. **SISO attribution.** Anything derived from the FOM modules (including generated `.proto` files) must carry: "Reprinted with permission from SISO Inc." (licence notice inside every FOM XML file).
-7. **Questions for the PDG vice chair are batched**, never sent piecemeal: add them to `reference-docs/questions-for-alfredo.md` (local, git-excluded, in Italian). The owner sends them all at once.
+7. **Run every new or edited document through the humanizer skill** ([blader/humanizer](https://github.com/blader/humanizer), `SKILL.md` installed in `~/.claude/skills/humanizer/`) in file mode: prose only, keeping code, links, citations and facts unchanged.
+8. **Questions for the PDG vice chair are batched**, never sent piecemeal: add them to `reference-docs/questions-for-alfredo.md` (local, git-excluded, in Italian). The owner sends them all at once.
 
 ## Where things are
 
