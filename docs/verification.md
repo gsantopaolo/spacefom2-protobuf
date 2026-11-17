@@ -43,7 +43,8 @@ Every technical statement in the proposal was checked against the primary source
 | Each action is pinned to the commit its release tag points to (annotated tags dereferenced), resolved through the GitHub API on 2026-11-17: checkout v7.0.1, setup-python v7.1.0, buf-action v1.7.0, upload-artifact v7.0.2, download-artifact v8.0.2, create-pull-request v8.1.3 | `GET /repos/{owner}/{repo}/git/ref/tags/{tag}` for each action |
 | A `run:` step with no `shell:` runs as `bash -e {0}` (no `pipefail`); `shell: bash` runs `bash --noprofile --norc -eo pipefail {0}`. The pull-request check steps set `shell: bash`, so a failing check piped into `tee` still fails the step | [GitHub Docs, workflow syntax, `defaults.run.shell`][gh-shell] |
 | actionlint v1.7.12, `linux_amd64` archive sha256 `8aca8db9…a3d8`, from the release's checksums file | [actionlint v1.7.12 release][actionlint] |
-| shellcheck is preinstalled on the Ubuntu 24.04 runner image (0.9.0-1), so actionlint also checks `run:` scripts in CI | [runner-images, Ubuntu 24.04 readme][runner-2404] |
+| Every job runs on the `ubuntu-26.04` label, a supported image in the runner-images README, rather than `ubuntu-latest`, which was moving to Ubuntu 26 during November 2026 ([#24](https://github.com/gsantopaolo/spacefom2-protobuf/issues/24)). Runs before the pin already reported `Image: ubuntu-26.04`, for example run 44094528425. actionlint v1.7.12 does not know the label yet, so `.github/actionlint.yaml` declares it | [runner-images README][runner-images]; [actionlint configuration][al-config] |
+| shellcheck is preinstalled on the Ubuntu 26.04 runner image (0.11.0-2), so actionlint also checks `run:` scripts in CI | [runner-images, Ubuntu 26.04 readme][runner-2604] |
 
 ## Not yet verified
 
@@ -107,4 +108,6 @@ FOM XML: SpaceFOM 1.0 modules as distributed in [nasa/TrickHLA][trickhla]; links
 [siso-forms]: https://www.sisostandards.org/page/FormsandTemplates
 [gh-shell]: https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#defaultsrunshell
 [actionlint]: https://github.com/rhysd/actionlint/releases/tag/v1.7.12
-[runner-2404]: https://github.com/actions/runner-images/blob/main/images/ubuntu/Ubuntu2404-Readme.md
+[runner-images]: https://github.com/actions/runner-images#available-images
+[runner-2604]: https://github.com/actions/runner-images/blob/main/images/ubuntu/Ubuntu2604-Readme.md
+[al-config]: https://github.com/rhysd/actionlint/blob/v1.7.12/docs/config.md

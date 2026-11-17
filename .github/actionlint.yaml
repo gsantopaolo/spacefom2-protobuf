@@ -1,0 +1,7 @@
+# actionlint configuration (https://github.com/rhysd/actionlint/blob/v1.7.12/docs/config.md).
+self-hosted-runner:
+  labels:
+    # Not a self-hosted runner: ubuntu-26.04 is a GitHub-hosted image listed in
+    # https://github.com/actions/runner-images#available-images, but actionlint
+    # v1.7.12 predates it. Remove this once a newer pinned actionlint knows the label (#24).
+    - ubuntu-26.04
