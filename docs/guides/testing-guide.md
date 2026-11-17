@@ -48,7 +48,7 @@ You need [conda](https://docs.conda.io) and a copy of the repository. Open a ter
    ```sh
    SPACEFOM_FOM_DIR=build/fom python -m pytest -q generator/tests tools
    ```
-   The last line should say `42 passed`.
+   The last line should say `114 passed`.
 
 If all three checks look like this, the generator works on your computer.
 
