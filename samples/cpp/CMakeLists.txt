@@ -7,25 +7,30 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Protobuf C++ needs the runtime to match the generated code exactly
 # (https://protobuf.dev/support/cross-version-runtime-guarantee/).
 # Use an installed protobuf 36.2 if there is one; otherwise build it.
-set(SPACEFOM_PROTOBUF_TAG v36.2)
 find_package(protobuf CONFIG QUIET)
 if(protobuf_FOUND AND NOT protobuf_VERSION VERSION_EQUAL 36.2)
   message(STATUS "Ignoring installed protobuf ${protobuf_VERSION}; need 36.2")
   set(protobuf_FOUND FALSE)
 endif()
 if(NOT protobuf_FOUND)
-  message(STATUS "protobuf 36.2 not installed; building ${SPACEFOM_PROTOBUF_TAG} from source")
+  message(STATUS "protobuf 36.2 not installed; building it from source")
   include(FetchContent)
+  # Abseil 20250512.1, the version protobuf v36.2 names in
+  # cmake/dependencies.cmake, pinned to its release commit. Building it here
+  # first stops protobuf from fetching it by tag or using another installed Abseil.
+  set(ABSL_PROPAGATE_CXX_STD ON CACHE BOOL "" FORCE)
+  FetchContent_Declare(
+    absl
+    URL https://github.com/abseil/abseil-cpp/archive/76bb24329e8bf5f39704eb10d21b9a80befa7c81.tar.gz
+  )
+  FetchContent_MakeAvailable(absl)
+  # protobuf v36.2, pinned to its release commit.
   set(protobuf_BUILD_TESTS OFF CACHE BOOL "" FORCE)
   set(protobuf_BUILD_PROTOC_BINARIES OFF CACHE BOOL "" FORCE)
   set(protobuf_INSTALL OFF CACHE BOOL "" FORCE)
-  set(protobuf_ABSL_PROVIDER module CACHE STRING "" FORCE)
-  set(ABSL_PROPAGATE_CXX_STD ON CACHE BOOL "" FORCE)
   FetchContent_Declare(
     protobuf
-    GIT_REPOSITORY https://github.com/protocolbuffers/protobuf.git
-    GIT_TAG ${SPACEFOM_PROTOBUF_TAG}
-    GIT_SHALLOW TRUE
+    URL https://github.com/protocolbuffers/protobuf/archive/2c74169b34066ceb8ddb6b882fcb3fb32d737a55.tar.gz
   )
   FetchContent_MakeAvailable(protobuf)
 endif()
