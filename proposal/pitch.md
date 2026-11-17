@@ -26,8 +26,16 @@ HLA is not replaced: roles, synchronization and time management stay in HLA, whi
 - **Ready for streaming, recording and replay** of federation runs.
 - **Additive and low risk**: no change to federates, the RTI or compliance rules.
 
+## Implementation status
+
+Open-source work at **[github.com/gsantopaolo/spacefom2-protobuf](https://github.com/gsantopaolo/spacefom2-protobuf)**:
+
+- [verified example schema](https://github.com/gsantopaolo/spacefom2-protobuf/blob/main/docs/examples/reference_frame.proto) for `ReferenceFrame`, checked field by field against SISO-STD-018-2020 and compiling with `protoc`;
+- [generator and CI plan](https://github.com/gsantopaolo/spacefom2-protobuf/blob/main/docs/plans/generator-ci-plan.md) (FOM XML → `.proto`, regenerated automatically on FOM changes);
+- working prototype (generator, bridge federate, Docker demo): in progress, to be linked here.
+
 ## Who proposes it
 
 **Gian Paolo Santopaolo**, Senior AI/ML Engineer at Alloy Therapeutics (Basel, Switzerland), a position reached through experience rather than a formal engineering degree, where he leads the design and deployment of conversational and agentic AI systems that let scientists work with proprietary research data. More than 20 years architecting and implementing highly available, highly scalable, distributed real-time systems worldwide; long-time Protocol Buffers user and speaker; Microsoft Regional Director and three-time Microsoft MVP. Available to present the idea with a working demo and to act as lead analyst for the PCR.
 
-<sub>Prepared with Claude (Anthropic) as a research and drafting aid; every technical fact was checked against SISO-STD-018-2020 and the SpaceFOM FOM XML. I reviewed it and stand behind it. Details: [technical overview](../docs/technical-overview.md) · [draft PCR](pcr-draft.md).</sub>
+<sub>Prepared with Claude (Anthropic) as a research and drafting aid; every technical fact was checked against SISO-STD-018-2020 and the SpaceFOM FOM XML. I reviewed it and stand behind it. Details: [technical overview](https://github.com/gsantopaolo/spacefom2-protobuf/blob/main/docs/technical-overview.md) · [draft PCR](https://github.com/gsantopaolo/spacefom2-protobuf/blob/main/proposal/pcr-draft.md) · [verification](https://github.com/gsantopaolo/spacefom2-protobuf/blob/main/docs/verification.md).</sub>
