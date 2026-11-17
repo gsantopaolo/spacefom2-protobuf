@@ -66,16 +66,19 @@ def paths(d):
     return [d / "SISO_SpaceFOM_datatypes.xml", d / "SISO_SpaceFOM_entity.xml"]
 
 
-def compiled(tmp_path, result):
+def descriptors(tmp_path, result):
     root = tmp_path / "out"
     for rel, text in result.files.items():
         (root / rel).parent.mkdir(parents=True, exist_ok=True)
         (root / rel).write_text(text, encoding="utf-8")
-    return messages(compile_descriptors(root, sorted(result.files), tmp_path / "out.pb"))
+    return compile_descriptors(root, sorted(result.files), tmp_path / "out.pb")
 
 
-OPT = 3  # FieldDescriptorProto.LABEL_OPTIONAL
-REP = 3
+def compiled(tmp_path, result):
+    return messages(descriptors(tmp_path, result))
+
+
+OPT, REP = 1, 3  # FieldDescriptorProto.LABEL_OPTIONAL, LABEL_REPEATED
 DOUBLE, STRING, INT64, MESSAGE, ENUM = 1, 9, 3, 11, 14
 
 
@@ -84,24 +87,26 @@ def test_full_mapping_compiles(tmp_path, fom_dir):
     msgs = compiled(tmp_path, result)
     p = "siso.spacefom.v1."
     assert msgs[p + "PositionVector"] == {
-        "x": (1, DOUBLE, "", 1, False), "y": (2, DOUBLE, "", 1, False), "z": (3, DOUBLE, "", 1, False),
+        "x": (1, DOUBLE, "", OPT, False),
+        "y": (2, DOUBLE, "", OPT, False),
+        "z": (3, DOUBLE, "", OPT, False),
     }
     # Fixed records: plain fields, FOM order.
     assert msgs[p + "State"] == {
-        "position": (1, MESSAGE, ".siso.spacefom.v1.PositionVector", 1, False),
-        "length": (2, DOUBLE, "", 1, False),
+        "position": (1, MESSAGE, ".siso.spacefom.v1.PositionVector", OPT, False),
+        "length": (2, DOUBLE, "", OPT, False),
     }
     # Object classes: all attributes optional, inherited ones first.
     derived = msgs[p + "Derived"]
     assert [n for n, _ in sorted(derived.items(), key=lambda kv: kv[1][0])] == [
         "name", "state", "inertia", "mode", "ticks",
     ]
-    assert derived["name"] == (1, STRING, "", 1, True)
+    assert derived["name"] == (1, STRING, "", OPT, True)
     assert derived["inertia"] == (3, DOUBLE, "", REP, False)  # 9-array -> repeated double
-    assert derived["mode"] == (4, ENUM, ".siso.spacefom.v1.ExecutionMode", 1, True)
-    assert derived["ticks"] == (5, INT64, "", 1, True)
+    assert derived["mode"] == (4, ENUM, ".siso.spacefom.v1.ExecutionMode", OPT, True)
+    assert derived["ticks"] == (5, INT64, "", OPT, True)
     # Interactions: plain fields.
-    assert msgs[p + "Request"]["execution_mode"][3:] == (1, False)
+    assert msgs[p + "Request"]["execution_mode"][3:] == (OPT, False)
     assert "InertiaMatrix" not in {k.rsplit(".", 1)[1] for k in msgs}
 
 
@@ -147,6 +152,29 @@ def test_matrix_semantics_go_on_each_field_that_uses_it(fom_dir):
     off = generate(paths(fom_dir), empty_lock(), semantics=False).files[entity]
     assert "Matrix semantics" not in off
     assert "  // InertiaMatrix: 3x3 as 9 elements in HLA array order;" in off
+
+
+def test_removed_fields_are_emitted_as_reserved_and_compile(tmp_path, fom_dir):
+    first = generate(paths(fom_dir), empty_lock())
+    # The FOM drops Derived.mode and every parameter of Request.
+    mode = attributes(("mode", "ExecutionMode"))
+    parameter = "<parameter><name>execution_mode</name><dataType>MTRMode</dataType></parameter>"
+    assert mode in ENTITY and parameter in ENTITY
+    write_module(fom_dir, "entity", ENTITY.replace(mode, "").replace(parameter, ""))
+    result = generate(paths(fom_dir), first.lock)
+    text = result.files["siso/spacefom/v1/entity.proto"]
+    assert (
+        '  optional int64 ticks = 5;  // HLAinteger64Time\n\n  reserved 4;\n  reserved "mode";\n}'
+    ) in text
+    assert 'message Request {\n  reserved 1;\n  reserved "execution_mode";\n}' in text
+
+    fds = descriptors(tmp_path, result)
+    found = {m.name: m for f in fds.file for m in f.message_type}
+    assert [(r.start, r.end) for r in found["Derived"].reserved_range] == [(4, 5)]
+    assert list(found["Derived"].reserved_name) == ["mode"]
+    assert [(r.start, r.end) for r in found["Request"].reserved_range] == [(1, 2)]
+    assert list(found["Request"].reserved_name) == ["execution_mode"]
+    assert not found["Request"].field
 
 
 def test_interactions_flag_keeps_numbers(fom_dir):
