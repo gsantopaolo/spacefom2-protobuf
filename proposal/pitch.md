@@ -16,7 +16,7 @@ The SpaceFOM datatypes map cleanly onto Protocol Buffers: SpaceFOM 1.0 uses only
 
 <p align="center"><img src="../docs/images/bridge-architecture.svg" alt="HLA stays inside the federation; Protobuf carries SpaceFOM data out" width="640"></p>
 
-Roles, synchronization and time management stay in HLA, which remains the source of truth inside the federation.
+Roles, synchronization and time management stay in HLA, which remains the source of truth inside the federation. The schema fits the [SpaceFOM 2 Product Nomination](https://www.sisostandards.org/resource/resmgr/forms_and_templates/siso-pn-038-draft__spacefom_.pdf) (SISO-PN-038), which already covers SISO Product Data Files such as XML schemas and lists its capabilities as "including, but not limited to"; the target is its circulation package, planned for 1 July 2027.
 
 ## Expected benefits
 

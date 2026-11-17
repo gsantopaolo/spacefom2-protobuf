@@ -22,6 +22,7 @@ Every technical statement in the proposal was checked against the primary source
 | In the Federate Protocol, attribute and parameter values are opaque `bytes`; Protobuf defines only the service envelope | IEEE 1516.1 Federate Protocol `datatypes.proto` (package `rti1516_2024.fedpro`, 2024 draft): [`AttributeHandleValue` L167–170][fp-ahv], [`ParameterHandleValue` L178–181][fp-phv], as published in the [HLA4FP open-source server][fp-repo]. Same layout in the 2025 generated code of [`@hla4ts/proto` 0.1.1][hla4ts] and [VTMAK Python-Federate-Protocol][vtmak]. "Reprinted with permission from IEEE 1516.1(TM)-2024" |
 | SpaceFOM 2.0 topics: configurable time resolution, epoch 2000, HLA 4 directed interactions and `Reference` datatype | SIMposium 2026 presentation, [slide 17][sim17] and [slide 19][sim19] |
 | Proposed changes are collected as PCRs by the SpaceFOM PSG | [SISO SIW 2025 SpaceFOM paper §3.4][siw25-p7]; [SISO-ADM-003 Appendix A][adm-a] |
+| SpaceFOM 2 Product Nomination (SISO-PN-038-DRAFT, PN form Rev 4): SAC approval 05/20/2026; ticks "SISO Product Data Files (supplementary files, e.g., XML, XML Schemas, UML, JSON, etc.)"; V2 capabilities "including, but not limited to" the listed ones; circulation package to SAC planned 7/1/2027 | [SISO-PN-038-DRAFT][pn038], §1.3, §1.4, §1.5, as listed on SISO's [Forms & Templates][siso-forms] page |
 | `MTRMode` values are 2, 3, 4 (no 0); `ExecutionMode` starts at `EXEC_MODE_UNINITIALIZED = 0` | [`SISO_SpaceFOM_management.xml` L227–268][xml-enums] |
 | `DynamicalEntity` is nested inside `PhysicalEntity` in the FOM (a subclass), so the generator flattens it | [`SISO_SpaceFOM_entity.xml` L172–242][xml-dyn] |
 | `ExecutionConfiguration.least_common_time_step` is `HLAinteger64Time` | [`SISO_SpaceFOM_management.xml` L143–147][xml-lcts] |
@@ -99,3 +100,5 @@ FOM XML: SpaceFOM 1.0 modules as distributed in [nasa/TrickHLA][trickhla]; links
 [buf-gen]: https://buf.build/docs/configuration/v2/buf-gen-yaml/
 [cpr-labels]: https://github.com/peter-evans/create-pull-request/blob/3ffccacd46053766916f087ce41d627c0b8cf2d1/src/github-helper.ts#L239-L246
 [gh-labels]: https://docs.github.com/en/rest/issues/labels#add-labels-to-an-issue
+[pn038]: https://www.sisostandards.org/resource/resmgr/forms_and_templates/siso-pn-038-draft__spacefom_.pdf
+[siso-forms]: https://www.sisostandards.org/page/FormsandTemplates
