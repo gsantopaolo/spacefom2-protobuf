@@ -1,6 +1,6 @@
 # Plan: multi-language samples generated from the SpaceFOM `.proto`
 
-Status: **approved** by the repo owner on 2026-11-17. Decisions **[S1]…[S5]** are answered at the end.
+Status: **approved** by the repo owner on 2026-11-17 and built in PR [#8](https://github.com/gsantopaolo/spacefom2-protobuf/pull/8). Decisions **[S1]…[S5]** are answered at the end.
 
 ## Goal
 
@@ -61,7 +61,7 @@ The readers compare values, not bytes, because protobuf serialization is not can
 
 A new workflow, `generate-samples.yml`, runs on changes to `proto/` or `samples/`:
 
-1. One job regenerates the bindings (`buf generate`, then `attribution.py`) and the data (`writer.py`). On a pull request it fails if `samples/generated/` or `samples/data/` changed ([S2]).
+1. One job regenerates the bindings (`buf generate`, then `attribution.py`) and the data (`writer.py`). On a pull request it fails if `samples/generated/` or `samples/data/` changed ([S2]). (Changed on 2026-11-17 by PR [#20](https://github.com/gsantopaolo/spacefom2-protobuf/pull/20) for [#19](https://github.com/gsantopaolo/spacefom2-protobuf/issues/19): a pull request that changes only the inputs now passes and the bot regenerates the output after the merge; a hand edit that does not match the generator still fails. See [`samples/README.md`](../../samples/README.md#how-the-pieces-are-produced).)
 2. One matrix job per language sets up the toolchain, builds, runs the reader and runs the language's tests. The tests also round-trip each of the 18 message types with every field set, finding them through protobuf reflection.
 3. On `main`, a last job opens a pull request with the regenerated files.
 
