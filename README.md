@@ -39,21 +39,7 @@ Federation roles, synchronization and time management stay in HLA; the schema is
 
 ## Example
 
-`ReferenceFrame`, as defined in SISO-STD-018-2020 (Tables C-4 to C-7, C-13), rendered as Protobuf. Full file: [docs/examples/reference_frame.proto](docs/examples/reference_frame.proto).
-
-```protobuf
-message SpaceTimeCoordinateState {
-  ReferenceFrameTranslation translational_state = 1;
-  ReferenceFrameRotation rotational_state = 2;
-  double time = 3;  // Time: simulated physical time (TT), s
-}
-
-message ReferenceFrame {
-  optional string name = 1;
-  optional string parent_name = 2;  // empty for the root frame
-  optional SpaceTimeCoordinateState state = 3;
-}
-```
+[`docs/examples/reference_frame.proto`](docs/examples/reference_frame.proto) is `ReferenceFrame`, as defined in SISO-STD-018-2020 (Tables C-4 to C-7, C-13), written as Protobuf. The generated schema for all four FOM modules is in [`proto/siso/spacefom/v1/`](proto/siso/spacefom/v1/), and the [technical overview](docs/technical-overview.md#mapping) explains the mapping.
 
 ## Roadmap
 
@@ -62,7 +48,7 @@ message ReferenceFrame {
 - [x] Generated code, samples and tests in six languages
 - [ ] Bridge federate: HLA updates → Protobuf → Kafka / gRPC
 - [ ] Docker Compose demo: sample federation, bridge and non-HLA consumers
-- [ ] Technical documentation and diagrams for the PDG hearing (first version: [technical briefing](docs/hearing/technical-briefing.md))
+- [x] Technical documentation and diagrams for the PDG hearing, first version: [technical briefing](docs/hearing/technical-briefing.md)
 
 ## Generating the schema
 
@@ -70,30 +56,31 @@ The generator is plain Python 3.11 and needs no XML library beyond the standard 
 
 **How to test it, step by step** (on your computer and on GitHub): [testing guide](docs/guides/testing-guide.md).
 
-`--no-semantics` leaves the FOM's `<semantics>` text out of the comments, and `--no-interactions` leaves out `ModeTransitionRequest`. Field numbers are kept stable by [`generator/field-ids.lock.json`](generator/field-ids.lock.json) (see [Field numbers](docs/technical-overview.md#field-numbers)).
+`--no-semantics` leaves the FOM's `<semantics>` text out of the comments, and `--no-interactions` leaves out `ModeTransitionRequest`. Field numbers are kept stable by [`generator/field-ids.lock.json`](generator/field-ids.lock.json), which the generator writes, and renames are listed by reviewers in `generator/field-renames.json` (see [Field numbers](docs/technical-overview.md#field-numbers)).
 
 ### Triggering the generation in CI
 
-The [`generate-proto`](.github/workflows/generate-proto.yml) workflow runs the same steps on GitHub. What it does depends on how it starts:
+Two workflows regenerate the committed output: [`generate-proto`](.github/workflows/generate-proto.yml) turns the FOM into `proto/`, and [`generate-samples`](.github/workflows/generate-samples.yml) turns `proto/` into the code and data under `samples/` (see [samples](samples/README.md#how-the-pieces-are-produced)). Both behave the same way, and what they do depends on how they start:
 
 | Trigger | What happens |
 |---|---|
-| Push to `main` that changes `fom/`, `generator/`, `buf.yaml`, `tools/generated_output_check.py` or the workflow | Regenerates, runs the tests, `buf lint` and `buf breaking`. If the output changed, it copies the previous tree into `history/` and opens (or updates) a pull request from `generator/proto-update` |
-| Push to any other branch, same paths | The same run as a dry run: it reports what would change and never opens a pull request |
-| Pull request | Regenerates and runs every check on the fresh output, but opens nothing. A PR that changes only the inputs (`fom/`, `generator/`, `buf.yaml`) passes with a stale `proto/`, because the bot regenerates it after the merge. A PR that edits `proto/` or the lock file by hand fails if they don't match what the generator produces |
-| Manual run | Same as a push to the branch you pick; tick `dry_run` to skip the pull request on `main` |
+| Push to `main` that changes the workflow's inputs: for `generate-proto`, `fom/`, `generator/`, `buf.yaml`, `tools/generated_output_check.py` or the workflow; for `generate-samples`, `proto/`, `samples/`, `tools/generated_output_check.py` or the workflow | Regenerates and runs every check (for `generate-proto`: tests, `protoc`, `buf lint`, `buf breaking`; for `generate-samples`: build and tests in six languages). If the output changed, it opens (or updates) a pull request from `generator/proto-update` or `generator/samples-update`. `generate-proto` also copies the previous tree into `history/` |
+| Pull request | Regenerates and runs every check on the fresh output, but opens nothing. A PR that changes only the inputs passes with stale output, because the bot regenerates it after the merge. A PR that edits generated output by hand (`proto/`, the lock file, `samples/generated/`, `samples/data/`) fails if it doesn't match what the generator produces. The check compares the PR's merge commit with its first parent, so only the PR's own changes count |
+| Manual run ("Run workflow") | On `main`, the same as a push to `main`; tick `dry_run` to skip the pull request. On any other branch, a dry run that opens nothing |
 
-To run a workflow by hand, or to move to a newer FOM through the bot's pull requests, follow the [testing guide](docs/guides/testing-guide.md), Part 2 and Part 3. Pull requests opened by the bot wait for someone with write access to click "Approve workflows to run" before their checks run ([GitHub changelog, 11 June 2026](https://github.blog/changelog/2026-06-11-bot-created-pull-requests-can-run-workflows-if-approved/)).
+Pushes to other branches start neither workflow; open a pull request to run the checks. [`tools/generated_output_check.py`](tools/generated_output_check.py) makes the pull-request decision and has its own tests. Other checks run on pull requests: `pitch-rendered` fails a PR that changes `proposal/pitch.md` without `pitch.pdf` and `pitch.docx`, `docs-links` runs `tools/check_links.py` on PRs that touch Markdown and checks relative links and anchors, and `actionlint` lints changes to `.github/workflows/`.
+
+To run a workflow by hand, or to move to a newer FOM through the bot's pull requests, follow the [testing guide](docs/guides/testing-guide.md), Part 2 and Part 3. Bot pull requests need a manual approval before their checks run ([testing guide, step 11](docs/guides/testing-guide.md#c-first-bot-pull-request-the-schema)).
 
 ## Repository layout
 
 ```
 proposal/    one-page pitch, draft PCR, open questions, reference repository proposal
 tools/       render_pdf.py (Markdown to HTML, PDF and Word; needs pandoc, Chrome, librsvg) and the CI check scripts with their tests
-.github/     the four CI workflows: generate-proto, generate-samples, pitch-rendered, actionlint
+.github/     the CI workflows: generate-proto, generate-samples, pitch-rendered, actionlint, docs-links
 docs/        technical overview, verification, plans, diagrams, example .proto
 fom/         SOURCE.json: pinned upstream commit and sha256 of each FOM module
-generator/   the FOM XML -> .proto generator, its tests and the field-number lock file
+generator/   the FOM XML -> .proto generator, its tests, the field-number lock file and the renames file
 proto/       generated .proto files (do not edit by hand)
 history/     earlier generated trees, added by CI when the output changes
 samples/     generated code and tests in six languages (see samples/README.md)

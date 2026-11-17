@@ -29,6 +29,7 @@ You need [conda](https://docs.conda.io) and a copy of the repository. Open a ter
    ```sh
    pip install -r generator/requirements.txt
    ```
+   `requirements.txt` is a lock file with hashes. To change a dependency, edit `generator/requirements.in` (or `samples/python/requirements.in`) and recompile with `pip-compile --generate-hashes`.
 5. Tell Python where the generator code is:
    ```sh
    export PYTHONPATH=generator
@@ -77,7 +78,7 @@ These steps follow [GitHub Docs: manually running a workflow](https://docs.githu
 
 ### When to tick dry_run, and when not to
 
-A workflow opens a pull request only when all three are true: the generated output changed, the run is on `main`, and **dry_run** is not ticked. On an up-to-date `main` nothing changes, so the box makes no difference. It matters when `main` is behind its inputs, for example after an input change was merged but its bot pull request was never opened.
+A manual run opens a pull request only on `main`, with **dry_run** clear, and only when the generated output changed (the [trigger table](../../README.md#triggering-the-generation-in-ci) has the rules for every trigger). On an up-to-date `main` nothing changes, so the box makes no difference. It matters when `main` is behind its inputs, for example after an input change was merged but its bot pull request was never opened.
 
 - **Tick it** when you only want to look: the summary reports what would change, and nothing is opened or updated. This is also the safe choice for the checks above.
 - **Leave it clear** when you want the bot to act: an automatic run failed or got stuck after you merged a change, or a bot pull request was closed without being merged. The run then regenerates and opens (or updates) the pull request.

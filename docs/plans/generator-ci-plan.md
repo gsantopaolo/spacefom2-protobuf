@@ -1,4 +1,4 @@
-# Plan: FOM XML → `.proto` generator with CI
+# Plan: a FOM XML to `.proto` generator with CI
 
 Status: **approved** by the repo owner on 2026-11-17. Decisions **[D1]…[D8]** are answered in §9. Built in PR [#1](https://github.com/gsantopaolo/spacefom2-protobuf/pull/1); later changes are noted in §6.
 
@@ -6,7 +6,7 @@ Bracketed numbers like [S3] point to the Sources list at the end. Facts about th
 
 ## Contents
 
-1. [What the input actually contains](#1-what-the-input-actually-contains)
+1. [What the input contains](#1-what-the-input-contains)
 2. [Repo layout](#2-repo-layout)
 3. [Generator design](#3-generator-design)
 4. [Stable field numbering (the main technical risk)](#4-stable-field-numbering-the-main-technical-risk)
@@ -17,7 +17,7 @@ Bracketed numbers like [S3] point to the Sources list at the end. Facts about th
 9. [Decisions for you](#9-decisions-for-you)
 - [Sources](#sources)
 
-## 1. What the input actually contains
+## 1. What the input contains
 
 | Module | What the generator needs from it |
 |---|---|
@@ -55,26 +55,26 @@ One `.proto` per FOM module, all in package `siso.spacefom.v1`, with imports bet
 
 ## 3. Generator design
 
-- **Parsing:** use Python 3 stdlib `xml.etree.ElementTree` with a namespace map for `http://standards.ieee.org/IEEE1516-2010`. `findall()` returns elements in document order [S14], which is what makes field order deterministic. The Python docs point to the XML security notes for untrusted data [S14]. Our only input is our own pinned files, so `defusedxml` is optional. No third-party dependency is needed for parsing.
-- **Model:** build an intermediate model (types, records, arrays, enums, object classes, interactions) with name resolution across modules. The generator fails loudly on an unknown `dataType`, an unsupported encoding (anything not in the mapping table, such as variant records) or a name collision.
-- **Mapping:** follow the table in `docs/technical-overview.md`:
-  - simple types become `double`, with the unit as a comment;
-  - `HLAinteger64Time` becomes `int64`;
-  - `HLAunicodeString` becomes `string`;
-  - a fixed array of 3 becomes a message with `x`, `y`, `z`;
-  - a fixed array of 9 becomes `repeated double`, with "9 elements, row-wise" in a comment;
-  - a fixed record becomes a message, keeping field order;
-  - object-class attributes are all `optional`;
-  - `<semantics>` becomes a comment (word-wrapped, otherwise verbatim).
-- **Interactions:** whether to emit them is **[D5]**. The proposal is a generator flag that defaults to on, because there is only one interaction (`ModeTransitionRequest`).
-- **Deterministic output:**
-  - no timestamps or absolute paths inside the `.proto` files;
-  - LF line endings and a fixed indentation and wrap width;
-  - declaration order follows FOM document order, modules processed in a fixed order;
-  - the file header records the generator version and the sha256 of each input file.
+The parser uses Python's standard `xml.etree.ElementTree` with a namespace map for `http://standards.ieee.org/IEEE1516-2010`, so parsing needs no third-party dependency. `findall()` returns elements in document order [S14], which keeps field order deterministic. The Python docs point to the XML security notes for untrusted data [S14]; the only input is our own pinned files, so `defusedxml` is optional.
 
-  The same input therefore always produces identical bytes, which is what makes "did the output change?" a plain `git diff`.
-- **Attribution header** in every generated file: "Derived from SISO-STD-018-2020 FOM modules. Reprinted with permission from SISO Inc." (see §7).
+From the parsed XML the generator builds an intermediate model (types, records, arrays, enums, object classes, interactions) and resolves names across modules. It fails loudly on an unknown `dataType`, an unsupported encoding (anything not in the mapping table, such as variant records) or a name collision.
+
+The mapping follows the table in `docs/technical-overview.md`:
+
+- simple types become `double`, with the unit as a comment;
+- `HLAinteger64Time` becomes `int64`;
+- `HLAunicodeString` becomes `string`;
+- a fixed array of 3 becomes a message with `x`, `y`, `z`;
+- a fixed array of 9 becomes `repeated double`, with "9 elements, row-wise" in a comment;
+- a fixed record becomes a message, keeping field order;
+- object-class attributes are all `optional`;
+- `<semantics>` becomes a comment (word-wrapped, otherwise verbatim).
+
+Whether to emit interactions is **[D5]**. The proposal is a generator flag that defaults to on, because there is only one interaction (`ModeTransitionRequest`).
+
+The output is deterministic. The `.proto` files contain no timestamps or absolute paths, use LF line endings with a fixed indentation and wrap width, and declare everything in FOM document order, with the modules processed in a fixed order. The file header records the generator version and the sha256 of each input file. The same input therefore always produces identical bytes, so "did the output change?" is a plain `git diff`.
+
+Every generated file carries an attribution header: "Derived from SISO-STD-018-2020 FOM modules. Reprinted with permission from SISO Inc." (see §7).
 
 ## 4. Stable field numbering (the main technical risk)
 
@@ -84,7 +84,7 @@ The strategy is a committed lock file, `generator/field-ids.lock.json`:
 - It maps `Message.field` to a number. On the first run, numbers are assigned in FOM order starting at 1, which reproduces the hand-written example.
 - A new field gets `max(used ∪ retired) + 1`. Existing fields keep their numbers even if FOM order changes. Numbers 19000–19999 are skipped [S9].
 - A removed field moves to `retired` and is emitted as `reserved <n>; reserved "<name>";`.
-- **A rename in the FOM looks like delete + add.** The generator cannot tell the two apart. It emits a new number and the PR body lists the case under "needs human review". An optional `renames` section in the lock file lets a reviewer keep the old number. **[D6]**
+- **A rename in the FOM looks like delete + add.** The generator cannot tell the two apart. It emits a new number and the PR body lists the case under "needs human review". An optional `renames` section in the lock file lets a reviewer keep the old number. **[D6]** (Later moved to the reviewer-edited input `generator/field-renames.json`, [#29](https://github.com/gsantopaolo/spacefom2-protobuf/issues/29); the built flow is in the [technical overview](../technical-overview.md#field-numbers).)
 - Enum values use the FOM's own values, so they need no lock entries. Only the synthetic zero value is generator-defined.
 - The lock file is updated in the same PR as the `.proto` files, so reviewers see every new or retired number.
 
@@ -103,12 +103,9 @@ The strategy is a committed lock file, `generator/field-ids.lock.json`:
 
 ## 6. GitHub Action: `.github/workflows/generate-proto.yml`
 
-Changes after the plan was approved, all on 2026-11-17: the `push` trigger runs on every branch, as a dry run off `main`, and also watches `buf.yaml` and `tools/generated_output_check.py`; PR [#20](https://github.com/gsantopaolo/spacefom2-protobuf/pull/20) changed the pull-request check (below); PR [#25](https://github.com/gsantopaolo/spacefom2-protobuf/pull/25) pins every job to the `ubuntu-26.04` runner image. [`generate-proto.yml`](../../.github/workflows/generate-proto.yml) is the built version.
+Changes after the plan was approved, all on 2026-11-17: the `push` trigger runs on `main` only ([#29](https://github.com/gsantopaolo/spacefom2-protobuf/issues/29)) and also watches `buf.yaml` and `tools/generated_output_check.py`; PR [#20](https://github.com/gsantopaolo/spacefom2-protobuf/pull/20) changed the pull-request check (below); PR [#25](https://github.com/gsantopaolo/spacefom2-protobuf/pull/25) pins every job to the `ubuntu-26.04` runner image. [`generate-proto.yml`](../../.github/workflows/generate-proto.yml) is the built version.
 
-**Triggers (proposed):**
-- `workflow_dispatch`, for on-demand runs. It supports inputs [S3], for example `dry_run`.
-- `push` to `main` with `paths:` `fom/**`, `generator/**` and the workflow file [S3]. Merging a generated PR changes `proto/` and `history/`, which are not in the filter. The workflow is idempotent anyway, so it would be a no-op.
-- `pull_request` with the same paths, in **check mode** only: regenerate and run every check on the fresh output. It never opens a PR. A PR that changes only the inputs may leave `proto/` stale, because the bot regenerates it after the merge. A PR that edits `proto/` or the lock file by hand fails if they don't match the generator ([#19](https://github.com/gsantopaolo/spacefom2-protobuf/issues/19), decided by `tools/generated_output_check.py`).
+**Triggers:** `workflow_dispatch` (with a `dry_run` input [S3]), `push` and `pull_request`. What each one does as built is in the README's [trigger table](../../README.md#triggering-the-generation-in-ci).
 - Optional `schedule` (weekly) that checks whether TrickHLA's FOM files changed upstream and opens a PR updating `fom/SOURCE.json`. **[D7]**
 
 **Generate job steps:**
@@ -117,7 +114,7 @@ Changes after the plan was approved, all on 2026-11-17: the `push` trigger runs 
 3. Install the pinned dependencies (`grpcio-tools`, `pytest`).
 4. If not vendored, fetch the FOM XML at the commit pinned in `fom/SOURCE.json` and verify the sha256 values.
 5. Copy the current `proto/` to a temp directory, then run the generator, which writes `proto/` and the lock file.
-6. Run the validation from §5. **Validation must pass here, inside this job:** a PR opened with the default `GITHUB_TOKEN` does not run `pull_request` workflows on its own. "Events triggered by the `GITHUB_TOKEN` will not create a new workflow run" except `workflow_dispatch` and `repository_dispatch` [S4][S5]. Since June 2026, those workflows wait for a user with write access to approve them ([GitHub changelog, 11 June 2026](https://github.blog/changelog/2026-06-11-bot-created-pull-requests-can-run-workflows-if-approved/)); the end-to-end test on 17 November 2026 showed exactly that on bot PRs #22 and #23.
+6. Run the validation from §5. **Validation must pass here, inside this job:** a PR opened with the default `GITHUB_TOKEN` does not run `pull_request` workflows on its own. "Events triggered by the `GITHUB_TOKEN` will not create a new workflow run" except `workflow_dispatch` and `repository_dispatch` [S4][S5]. Since June 2026 they run after approval ([testing guide, step 11](../guides/testing-guide.md#c-first-bot-pull-request-the-schema)).
 7. `git diff --quiet -- proto/ generator/field-ids.lock.json`. If nothing changed, stop.
 8. Otherwise, move the temp copy into `history/<UTC-timestamp>_<fom-sha7>/` and add a `MANIFEST.json` (previous FOM sha256 values, generator version, the source commit of `main`).
 9. Open the PR with `peter-evans/create-pull-request@v8`, pinned to v8.1.3, the latest release [S1][S17]:
@@ -130,11 +127,11 @@ Changes after the plan was approved, all on 2026-11-17: the `push` trigger runs 
    If there is no diff, the action "exits silently" [S1].
 
 **Permissions:**
-- Workflow `permissions: contents: read`. Only a separate `pull-request` job, which runs on `main` only, gets `contents: write, pull-requests: write` [S1][S2]. The generate job, including branch dry runs, stays read-only and hands its result to that job as an artifact ([#4](https://github.com/gsantopaolo/spacefom2-protobuf/issues/4)).
+- Workflow `permissions: contents: read`. Only a separate `pull-request` job, which runs on `main` only, gets `contents: write, pull-requests: write` [S1][S2]. The generate job, including dry runs, stays read-only and hands its result to that job as an artifact ([#4](https://github.com/gsantopaolo/spacefom2-protobuf/issues/4)).
 - Every action is pinned to a full commit SHA, with the release tag in a comment ([#3](https://github.com/gsantopaolo/spacefom2-protobuf/issues/3)).
 - The repo setting **Settings → Actions → General → Workflow permissions → "Allow GitHub Actions to create and approve pull requests"** must be enabled. It is off by default for personal-account repos [S8].
 - Add `concurrency: { group: generate-proto, cancel-in-progress: false }` [S3] so two runs never race on the PR branch.
-- **[D8]** If you want CI checks to run *on* the bot PR, use a GitHub App token or a fine-grained PAT (`contents` and `pull-requests` write) instead of `GITHUB_TOKEN` [S1]. Otherwise, step 6 above is the only gate. (Since June 2026 the bot PR's own checks also run, once someone approves them; see step 6.)
+- **[D8]** If you want CI checks to run *on* the bot PR, use a GitHub App token or a fine-grained PAT (`contents` and `pull-requests` write) instead of `GITHUB_TOKEN` [S1]. Otherwise, step 6 above is the only gate. (Since June 2026 the bot PR's own checks also run once approved; see step 6.)
 
 **History-folder rules:**
 - Archive only when the generated output differs.
@@ -156,7 +153,7 @@ Changes after the plan was approved, all on 2026-11-17: the `push` trigger runs 
   - (b) Can generated files containing that text sit under this repo's MIT license?
 
 **Options [D1]:**
-- **A. Do not vendor (recommended until clarified).** `fom/SOURCE.json` pins the TrickHLA commit (FOM files currently last changed in `1677fd0`, 2025-12-02; `datatypes.xml` at `ed05f1b`) and the sha256 of each file. CI downloads them at run time. The trigger becomes "`fom/SOURCE.json` changed".
+- **A. Do not vendor (recommended until clarified).** `fom/SOURCE.json` pins the TrickHLA commit (`1677fd0`, 2025-12-02, the last commit that touched the folder; the four files were last changed in `ed05f1b`, 2020-06-04) and the sha256 of each file. CI downloads them at run time. The trigger becomes "`fom/SOURCE.json` changed".
 - **B. Vendor into `fom/`** with `NOTICE` (SISO attribution), `LICENSE-NOSA-1.3.txt`, the provenance file and a change log. Do this only after SISO and/or NASA confirm.
 
 Either way, generated files carry the SISO attribution line, and `README.md` should say they are derived works. In either case, ask the SpaceFOM PDG which source they consider authoritative (TrickHLA or SISO's own distribution).

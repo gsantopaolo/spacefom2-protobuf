@@ -64,7 +64,7 @@ Protobuf identifies a field on the wire by its number, so the number "cannot be 
 - On the first run, numbers follow FOM order from 1, which reproduces the [example](#example-output).
 - A new field gets the highest number used so far plus one, skipping 19000 to 19999, which protobuf reserves for itself.
 - A field that disappears from the FOM is emitted as `reserved` (number and name), so nobody can reuse it.
-- The generator cannot tell a renamed field from a deleted one plus a new one, so a rename gets a new number and the update PR lists it for review. To keep the old number, a reviewer adds the pair to `generator/field-renames.json` (`{"Message": {"new_name": "old_name"}}`) in a pull request before the bot's PR for the rename is merged. The renamed field then keeps the old number, and the old name is reserved. If the new name already has a different number in the lock file, the generator stops with an error instead of ignoring the entry.
+- The generator cannot tell a renamed field from a deleted one plus a new one, so a rename gets a new number and the update PR lists it for review. To keep the old number, a reviewer adds the pair to `generator/field-renames.json` (`{"Message": {"new_name": "old_name"}}`) in a pull request to `main` and merges it before the bot's PR. The bot then regenerates: the new name gets the old number, and the old name stays reserved. If the bot's PR was merged first, the new name already has a different number, and the generator stops with an error instead of ignoring the entry.
 
 The lock file is generator output: only the generator writes it, and a pull request that edits it by hand fails its check. `generator/field-renames.json` is an input that reviewers edit.
 

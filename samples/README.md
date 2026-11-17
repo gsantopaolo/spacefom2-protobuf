@@ -11,7 +11,7 @@ This folder holds code generated from the SpaceFOM `.proto` schema in six langua
 | TypeScript | [`generated/typescript`](generated/typescript) | [`typescript/`](typescript) (Node 26, `node:test`) | `@bufbuild/protobuf` 2.17.0 |
 | Go | [`generated/go`](generated/go) | [`go/`](go) (`go test`) | `google.golang.org/protobuf` v1.36.12 |
 
-The package names (`org.siso.spacefom.v1` in Java, `Siso.Spacefom.V1` in C#) are proposals. SISO has not published or approved them; see the [reference repository proposal](../proposal/reference-repository.md).
+The package names (`org.siso.spacefom.v1` in Java, `Siso.Spacefom.V1` in C#) are proposals. SISO has not published or approved them; the names are [open question Q6](../proposal/open-questions.md#naming-and-hosting).
 
 ## How the pieces are produced
 
@@ -26,10 +26,10 @@ flowchart TD
     C -->|"reviewed and merged"| M2["main"]
 ```
 
-1. [`generate-proto`](../.github/workflows/generate-proto.yml) runs when `fom/`, `generator/`, `buf.yaml` or its own file changes on `main`. It downloads the pinned FOM modules, runs the generator, validates the result (`protoc`, tests, `buf lint`, `buf breaking`) and opens a pull request that updates `proto/`.
-2. [`generate-samples`](../.github/workflows/generate-samples.yml) runs when `proto/` or `samples/` changes. Merging the first pull request changes `proto/`, so the second workflow starts by itself. It runs `buf generate` with [`buf.gen.yaml`](buf.gen.yaml) and `attribution.py`, rewrites the data files, builds and tests all six languages in parallel, and opens a pull request that updates `samples/generated/` and `samples/data/`.
+1. [`generate-proto`](../.github/workflows/generate-proto.yml) runs when its inputs change on `main`. It downloads the pinned FOM modules, runs the generator, validates the result (`protoc`, tests, `buf lint`, `buf breaking`) and opens a pull request that updates `proto/`.
+2. [`generate-samples`](../.github/workflows/generate-samples.yml) runs when `proto/` or `samples/` changes on `main`. Merging the first pull request changes `proto/`, so the second workflow starts by itself. It runs `buf generate` with [`buf.gen.yaml`](buf.gen.yaml) and `attribution.py`, rewrites the data files, builds and tests all six languages in parallel, and opens a pull request that updates `samples/generated/` and `samples/data/`.
 
-On a pull request, each workflow regenerates its output and runs every check on the fresh result, but opens nothing. A pull request that changes only the inputs passes even though its committed output is now out of date; the run summary says the bot will regenerate it after the merge. A pull request that edits generated files by hand fails if they don't match what the generator produces. [`tools/generated_output_check.py`](../tools/generated_output_check.py) makes that decision and has its own tests. On branches other than `main`, each workflow runs as a dry run and opens no pull request. You can also start either one by hand from the Actions tab, with a `dry_run` option.
+What each workflow does on a pull request, on `main` and when started by hand is in the README's [trigger table](../README.md#triggering-the-generation-in-ci).
 
 ## What the code does
 
