@@ -127,6 +127,10 @@ Because the schema is generated from the FOM, each of these changes is handled b
 2. Status: informative annex first, normative later?
 3. Package naming and versioning of the published `.proto` files.
 4. Licence of the `<semantics>` text. Every FOM module carries SISO's copyright notice with two grants: "Schema and API" (any purpose, with the attribution "Reprinted with permission from SISO Inc.") and "Documentation" (non-commercial purposes only). The generator copies `<semantics>` text verbatim into `.proto` comments. Does that text count as Schema or as Documentation? And can generated `.proto` files that contain it, with the SISO attribution, be published in an MIT-licensed open-source repository, or is permission from the SISO Board needed? Until this is answered, the generator can leave the text out with a flag.
+5. Demo federation. The roadmap ends with a Docker Compose demo that runs a whole SpaceFOM federation: a generator of simulated data (for example a vehicle's state and sensor readings) publishes into the federation, the bridge carries the data out as Protobuf, and tools outside HLA consume it. What would make that demo convincing to the PDG?
+    - Which scenario: a generic one, or one the PDG already knows, such as the sample federates shipped with [nasa/TrickHLA](https://github.com/nasa/TrickHLA/tree/master/sims/SpaceFOM) or a SEE scenario?
+    - Which RTI the PDG uses, and whether one can be run freely in containers for a public demo.
+    - Whether the demo should also show the inbound direction (outside tool → Protobuf → HLA), which the current design does not cover.
 
 [proto3]: https://protobuf.dev/programming-guides/proto3/
 
