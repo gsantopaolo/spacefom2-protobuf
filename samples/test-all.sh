@@ -1,8 +1,7 @@
 #!/usr/bin/env sh
 # Regenerate the bindings and data, then build and test every language.
 # Run from the repository root: sh samples/test-all.sh
-# Needs protoc 36.2, buf, protoc-gen-go v1.36.12, Python 3.11+, Go, Node 26,
-# Java 17+ with Maven, .NET 10+ and CMake (see samples/README.md).
+# Needs the toolchains listed in samples/README.md ("Running it yourself").
 set -eu
 
 buf generate --template samples/buf.gen.yaml
