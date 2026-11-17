@@ -1,6 +1,6 @@
 # SpaceFOM Protobuf samples
 
-Code generated from the SpaceFOM `.proto` schema in six languages, plus a small program and a test suite in each one. Every language decodes the same data files, written by the Python sample, to show that SpaceFOM data published once can be read anywhere.
+This folder holds code generated from the SpaceFOM `.proto` schema in six languages, with a small reader program and a test suite for each. The Python sample writes a set of data files, and all six readers decode the same files, so each language is checked against data it did not write.
 
 | Language | Generated code | Sample and tests | Runtime library |
 |---|---|---|---|
@@ -15,34 +15,34 @@ The package names (`org.siso.spacefom.v1` in Java, `Siso.Spacefom.V1` in C#) are
 
 ## How the pieces are produced
 
-Two GitHub Actions workflows run one after the other. The first turns the FOM XML into `.proto` files. When those changes reach `main`, the second turns the `.proto` files into code for each language and tests it. Each workflow ends with a pull request that a person reviews and merges.
+Two GitHub Actions workflows run one after the other. The first turns the FOM XML into `.proto` files. When those changes reach `main`, the second turns the `.proto` files into code for each language and tests it. Each workflow ends by opening a pull request, which is reviewed before it is merged.
 
 ```mermaid
 flowchart TD
     A["SpaceFOM FOM modules (XML)<br/>pinned in fom/SOURCE.json"] -->|"workflow 1: generate-proto<br/>generator/ (Python)"| B["proto/siso/spacefom/v1/*.proto<br/>+ field-number lock file"]
     B -->|"pull request, reviewed and merged"| M["main"]
-    M -->|"workflow 2: generate-samples<br/>buf generate + samples/python/writer.py"| C["samples/generated/&lt;language&gt;/<br/>samples/data/*.binpb"]
+    M -->|"workflow 2: generate-samples<br/>buf generate, attribution.py, writer.py"| C["samples/generated/&lt;language&gt;/<br/>samples/data/*.binpb"]
     C --> T["build and test in C++, Python, Java,<br/>C#, TypeScript and Go"]
     T -->|"pull request, reviewed and merged"| M2["main"]
 ```
 
-1. **[`generate-proto`](../.github/workflows/generate-proto.yml)** runs when `fom/`, `generator/` or its own file changes on `main`. It downloads the pinned FOM modules, runs the generator, validates the result (`protoc`, tests, `buf lint`, `buf breaking`) and opens a pull request that updates `proto/`.
-2. **[`generate-samples`](../.github/workflows/generate-samples.yml)** runs when `proto/` or `samples/` changes. Merging the first pull request is such a change, so the second workflow follows on its own. It runs `buf generate` with [`buf.gen.yaml`](buf.gen.yaml), rewrites the data files, builds and tests all six languages in parallel, and opens a pull request that updates `samples/generated/` and `samples/data/`.
+1. [`generate-proto`](../.github/workflows/generate-proto.yml) runs when `fom/`, `generator/` or its own file changes on `main`. It downloads the pinned FOM modules, runs the generator, validates the result (`protoc`, tests, `buf lint`, `buf breaking`) and opens a pull request that updates `proto/`.
+2. [`generate-samples`](../.github/workflows/generate-samples.yml) runs when `proto/` or `samples/` changes. Merging the first pull request changes `proto/`, so the second workflow starts by itself. It runs `buf generate` with [`buf.gen.yaml`](buf.gen.yaml) and `attribution.py`, rewrites the data files, builds and tests all six languages in parallel, and opens a pull request that updates `samples/generated/` and `samples/data/`.
 
 On a pull request, each workflow only checks: it fails if the committed files are out of date or a test fails. On branches other than `main`, it runs as a dry run and opens no pull request. You can also start either one by hand from the Actions tab, with a `dry_run` option.
 
 ## What the code does
 
-- **[`buf.gen.yaml`](buf.gen.yaml)** lists one code generator per language. `protoc`'s built-in generators cover C++, Java, C# and Python; `protoc-gen-go` covers Go and `protoc-gen-es` covers TypeScript. Buf's managed mode adds the Java package and Go import path at generation time, so the `.proto` files carry no language-specific options.
-- **[`attribution.py`](attribution.py)** runs right after `buf generate`. protoc keeps the `.proto` header comment for Go and TypeScript but drops it for C++, Java, C# and Python, so this script adds the SISO attribution line to every generated file that lacks it. It changes nothing on a second run, so regeneration stays byte-identical.
-- **[`python/writer.py`](python/writer.py)** builds five messages: a root and a child `ReferenceFrame`, a `DynamicalEntity`, an `ExecutionConfiguration` and a `ModeTransitionRequest`. It writes each one to [`data/`](data) as protobuf binary (`.binpb`), plus a `.json` copy you can read.
-- **The readers** (`python/reader.py`, `go/main.go`, `typescript/reader.ts`, `java/src/main/java/Reader.java`, `csharp/Reader/Reader.cs`, `cpp/checks.cpp`) decode those files and check every value. They cover strings and doubles, the 9-element inertia matrix, enums, an empty `parent_name` that must still count as present, and an unset `torque` that must stay absent. The readers are short and look alike, so you can compare how each language handles the same message.
-- **The tests** in each language run three kinds of check:
+- [`buf.gen.yaml`](buf.gen.yaml) lists one code generator per language. `protoc`'s built-in generators cover C++, Java, C# and Python; `protoc-gen-go` covers Go and `protoc-gen-es` covers TypeScript. Buf's managed mode adds the Java package and Go import path at generation time, so the `.proto` files carry no language-specific options.
+- [`attribution.py`](attribution.py) runs right after `buf generate`. protoc keeps the `.proto` header comment for Go and TypeScript but drops it for C++, Java, C# and Python, so this script adds the SISO attribution line to every generated file that lacks it. It changes nothing on a second run, so regeneration stays byte-identical.
+- [`python/writer.py`](python/writer.py) builds five messages: a root and a child `ReferenceFrame`, a `DynamicalEntity`, an `ExecutionConfiguration` and a `ModeTransitionRequest`. It writes each one to [`data/`](data) as protobuf binary (`.binpb`), plus a `.json` copy you can read.
+- The readers (`python/reader.py`, `go/main.go`, `typescript/reader.ts`, `java/src/main/java/Reader.java`, `csharp/Reader/Reader.cs`, `cpp/checks.cpp`) decode those files and check every value. They cover strings and doubles, the 9-element inertia matrix, enums, an empty `parent_name` that must still count as present, and an unset `torque` that must stay absent. The readers are short and look alike, so you can compare how each language handles the same message.
+- The tests in each language run three kinds of check:
   - the reader checks above;
   - for each of the 18 generated message types, set every field, serialize, parse and compare (they find the types through protobuf reflection, so a missing type or field fails the test);
   - the enum values, including the `MTR_MODE_UNSPECIFIED = 0` value that the generator adds to `MTRMode`.
 
-Two language details are worth knowing. C# drops an enum value's prefix when it matches the enum's name, so `MTR_MODE_UNSPECIFIED` becomes `MTRMode.Unspecified` while `MTR_GOTO_RUN` becomes `MTRMode.MtrGotoRun`. TypeScript code is generated as JavaScript plus `.d.ts` files, because Node runs TypeScript by stripping types and does not accept TypeScript `enum` declarations.
+C# drops an enum value's prefix when it matches the enum's name, so `MTR_MODE_UNSPECIFIED` becomes `MTRMode.Unspecified` while `MTR_GOTO_RUN` becomes `MTRMode.MtrGotoRun`. TypeScript code is generated as JavaScript plus `.d.ts` files, because Node runs TypeScript by stripping types and does not accept TypeScript `enum` declarations.
 
 ## Running it yourself
 

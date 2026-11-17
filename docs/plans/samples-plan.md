@@ -4,11 +4,11 @@ Status: **approved** by the repo owner on 2026-11-17. Decisions **[S1]…[S5]** 
 
 ## Goal
 
-Show a vendor or tool builder that the generated schema works in their language. For each language this means two things: code generated from `proto/siso/spacefom/v1/`, and a small program that reads SpaceFOM data written by another language. That cross-language read is the claim the proposal makes, so the samples should prove it in CI rather than only ship generated files.
+Show a vendor or tool builder that the generated schema works in their language. Each language gets code generated from `proto/siso/spacefom/v1/` and a small program that reads SpaceFOM data written by another language. The proposal claims exactly that cross-language read, so CI runs it for every language.
 
 ## Which languages, and why
 
-Sources were opened on 2026-11-17. Claims marked *unverified* could not be checked against a primary page.
+I opened every source on 2026-11-17. Anything I could not check against a primary page is listed as unverified.
 
 | # | Language | Likely SpaceFOM consumers | Code generation |
 |---|---|---|---|
@@ -27,7 +27,7 @@ Left out:
 
 Unverified: Pitch pRTI's language APIs (pitchtechnologies.com now redirects to onearc.com), MAK VR-Link languages, and which languages SpaceFOM PSG reference federates use.
 
-All languages except Go and TypeScript generate with protoc's built-in generators. I checked that C++, C#, Java, Kotlin, Python and Rust generation all succeed on the current `proto/` with protoc 36.2.
+Go and TypeScript need plugins; the others use protoc's built-in generators. With protoc 36.2, generation for C++, C#, Java, Kotlin, Python and Rust succeeds on the current `proto/`.
 
 ## Layout
 
@@ -35,6 +35,7 @@ All languages except Go and TypeScript generate with protoc's built-in generator
 samples/
   README.md                 the two-workflow pipeline, what the code does, how to run it
   buf.gen.yaml              one generation config for every language
+  attribution.py            adds the SISO attribution to generated files that lack it
   test-all.sh               regenerate, then build and test every language locally
   data/                     shared data: one .binpb (and .json) per message
   python/                   writer.py, reader.py, test_samples.py (pytest)
@@ -46,23 +47,23 @@ samples/
   generated/<language>/     generated code, committed ([S2])
 ```
 
-`buf.gen.yaml` uses buf managed mode ([buf.gen.yaml v2](https://buf.build/docs/configuration/v2/buf-gen-yaml/)) to set `java_package`, `go_package` and similar options at generation time. The `.proto` files themselves stay free of language options. **[S3]**
+`buf.gen.yaml` uses buf managed mode ([buf.gen.yaml v2](https://buf.build/docs/configuration/v2/buf-gen-yaml/)) to set `java_package`, `go_package` and similar options at generation time, so the `.proto` files carry no language options. **[S3]**
 
 ## What the samples do
 
-- `python/writer.py` builds one `ReferenceFrame` (a root frame and a child frame), one `DynamicalEntity` (inherited plus own attributes, including the 9-element inertia matrix) and one `ExecutionConfiguration` (with an enum value). It writes them as length-delimited messages to `data/entities.binpb`.
-- Every `reader` decodes that file and prints the values. It then checks them against the expected values: names, numbers with exact `double` equality, the enum, and that `parent_name` is present and empty for the root frame, which tests `optional` presence.
-- Each reader also re-encodes the messages and decodes its own output, to show the round trip.
+- `python/writer.py` builds five messages: a root and a child `ReferenceFrame`, a `DynamicalEntity` (inherited and own attributes, including the 9-element inertia matrix), an `ExecutionConfiguration` and a `ModeTransitionRequest`. Each goes to its own file in `data/`, as `.binpb` plus a `.json` copy.
+- Every reader decodes those files and checks the values: names, numbers with exact `double` equality, the enums, an empty `parent_name` that must still count as present, and an unset `torque` that must stay absent.
+- Each reader then re-encodes one message and decodes its own output.
 
-Byte-for-byte equality across languages is not checked. Protobuf serialization is not canonical, so value equality is the right test.
+The readers compare values, not bytes, because protobuf serialization is not canonical across implementations.
 
 ## CI
 
 A new workflow, `generate-samples.yml`, runs on changes to `proto/` or `samples/`:
 
-1. Regenerate with `buf generate` and fail if `samples/generated/` changed ([S2]).
-2. One matrix job per language: set up the toolchain, build, run the reader, and run the language's tests. The tests also round-trip every one of the 18 message types with all fields set, found through protobuf reflection.
-3. The Python job also regenerates the fixture and checks it is unchanged.
+1. One job regenerates the bindings (`buf generate`, then `attribution.py`) and the data (`writer.py`). On a pull request it fails if `samples/generated/` or `samples/data/` changed ([S2]).
+2. One matrix job per language sets up the toolchain, builds, runs the reader and runs the language's tests. The tests also round-trip each of the 18 message types with every field set, finding them through protobuf reflection.
+3. On `main`, a last job opens a pull request with the regenerated files.
 
 The generate-proto bot's pull request does not trigger other workflows, so the samples cannot be checked inside it. Instead, the second workflow runs once that pull request is merged into `main` and opens a follow-up pull request for the samples. **[S5]**
 
@@ -74,10 +75,10 @@ Pin every plugin and runtime: protoc, `protoc-gen-go`, `protoc-gen-es` and the m
 
 | Phase | Work |
 |---|---|
-| 1 | `buf.gen.yaml`, generation for the chosen languages, Python writer and fixture |
-| 2 | Readers for C++, Java, C#, TypeScript, Go (and Rust if chosen) |
-| 3 | `samples.yml` matrix workflow; generate-proto update ([S5]) |
-| 4 | `samples/README.md`, links from the main README and technical overview; humanizer pass |
+| 1 | `buf.gen.yaml`, generation for the chosen languages, Python writer and data files |
+| 2 | Readers and tests for C++, Python, Java, C#, TypeScript and Go |
+| 3 | `generate-samples.yml` matrix workflow ([S5]) |
+| 4 | `samples/README.md`, links from the main README; humanizer pass |
 
 ## Decisions
 
@@ -88,7 +89,7 @@ Answered by the repo owner on 2026-11-17.
 | S1 | The six recommended languages: C++, Python, Java, C#, TypeScript, Go. No Rust for now |
 | S2 | Commit the generated code under `samples/generated/`; CI fails if it is stale |
 | S3 | Java package `org.siso.spacefom.v1`. Go import paths must be real repository paths, so Go uses `github.com/gsantopaolo/spacefom2-protobuf/samples/generated/go/...`. C# keeps protoc's default namespace `Siso.Spacefom.V1`. The samples README states that these names are proposals, not names published by SISO |
-| S4 | Generated code, plus the reader programs and the CI interop test |
+| S4 | Generated code, reader programs, tests, and the cross-language check in CI |
 | S5 | Yes, as a second workflow (owner's direction, 2026-11-17). `generate-samples` runs when `proto/` changes on `main`, which is what merging the generate-proto pull request does. It regenerates the bindings and data, builds and tests all six languages, and opens its own pull request. The pipeline is described in [`samples/README.md`](../../samples/README.md) |
 
 Versions follow protobuf's [cross-version runtime guarantee](https://protobuf.dev/support/cross-version-runtime-guarantee/): generated code is "never" paired with an older runtime, and C++ requires "an exact match between the generated code version and the runtime version". Everything is pinned to the protoc 36.2 release line: protoc 36.2, Python `protobuf` 7.36.2, `protobuf-java` 4.36.2, `Google.Protobuf` 3.36.2, libprotobuf 36.2 for C++, `protoc-gen-go` and `google.golang.org/protobuf` v1.36.12, and `@bufbuild/protoc-gen-es` with `@bufbuild/protobuf` 2.17.0.
