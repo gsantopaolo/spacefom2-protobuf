@@ -122,13 +122,14 @@ The strategy is a committed lock file, `generator/field-ids.lock.json`:
    - fixed `branch: generator/proto-update`, so later runs update the same PR rather than opening new ones [S1];
    - `add-paths: proto/, history/, generator/field-ids.lock.json`;
    - `delete-branch: true`;
-   - labels `generated`;
+   - no labels: whether GitHub creates a missing label is not documented, so the input was removed ([#5](https://github.com/gsantopaolo/spacefom2-protobuf/issues/5));
    - `body` with a summary of added, removed and renamed fields and new or retired numbers.
 
    If there is no diff, the action "exits silently" [S1].
 
 **Permissions:**
-- Workflow `permissions: contents: write, pull-requests: write` [S1][S2].
+- Workflow `permissions: contents: read`. Only a separate `pull-request` job, which runs on `main` only, gets `contents: write, pull-requests: write` [S1][S2]. The generate job, including branch dry runs, stays read-only and hands its result to that job as an artifact ([#4](https://github.com/gsantopaolo/spacefom2-protobuf/issues/4)).
+- Every action is pinned to a full commit SHA, with the release tag in a comment ([#3](https://github.com/gsantopaolo/spacefom2-protobuf/issues/3)).
 - The repo setting **Settings → Actions → General → Workflow permissions → "Allow GitHub Actions to create and approve pull requests"** must be enabled. It is off by default for personal-account repos [S8].
 - Add `concurrency: { group: generate-proto, cancel-in-progress: false }` [S3] so two runs never race on the PR branch.
 - **[D8]** If you want CI checks to run *on* the bot PR, use a GitHub App token or a fine-grained PAT (`contents` and `pull-requests` write) instead of `GITHUB_TOKEN` [S1]. Otherwise, step 6 above is the only gate.

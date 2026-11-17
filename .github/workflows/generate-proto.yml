@@ -38,10 +38,10 @@ jobs:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@v7.1.0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: pip
@@ -53,7 +53,7 @@ jobs:
         run: PYTHONPATH=generator python -m spacefom_proto generate --fom-dir "$FOM_DIR" --check
       - name: Unit, golden and idempotence tests
         run: SPACEFOM_FOM_DIR="$FOM_DIR" SPACEFOM_REQUIRE_FOM=1 python -m pytest generator/tests -q
-      - uses: bufbuild/buf-action@v1.7.0
+      - uses: bufbuild/buf-action@37ac33d8960807670a6e9719080e885197b09cc6 # v1.7.0
         with:
           setup_only: true
       - run: buf lint
@@ -66,25 +66,22 @@ jobs:
             echo "No proto/ on $base yet; skipping breaking check."
           fi
 
-  # Push and manual runs: regenerate; if anything changed, archive the previous
-  # tree and open a PR. All validation runs here, because a PR opened with
+  # Push and manual runs: regenerate and validate; if anything changed, archive
+  # the previous tree. All validation runs here, because a PR opened with
   # GITHUB_TOKEN does not trigger other workflows (plan §6, step 6).
+  # Read-only: dry runs on other branches never get write permissions (#4).
   generate:
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
-    concurrency:
-      group: generate-proto-${{ github.ref }}
-      cancel-in-progress: false
+    outputs:
+      changed: ${{ steps.diff.outputs.changed }}
     env:
       DRY_RUN: ${{ github.ref != 'refs/heads/main' || inputs.dry_run == true }}
     steps:
-      - uses: actions/checkout@v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@v7.1.0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: pip
@@ -104,7 +101,7 @@ jobs:
         run: SPACEFOM_FOM_DIR="$FOM_DIR" SPACEFOM_REQUIRE_FOM=1 python -m pytest generator/tests -q
       - name: Regenerating again changes nothing
         run: PYTHONPATH=generator python -m spacefom_proto generate --fom-dir "$FOM_DIR" --check
-      - uses: bufbuild/buf-action@v1.7.0
+      - uses: bufbuild/buf-action@37ac33d8960807670a6e9719080e885197b09cc6 # v1.7.0
         with:
           setup_only: true
       - run: buf lint
@@ -134,9 +131,46 @@ jobs:
         run: |
           echo "Dry run: $DRY_RUN" >> "$GITHUB_STEP_SUMMARY"
           cat "$RUNNER_TEMP/report.md" >> "$GITHUB_STEP_SUMMARY"
+      - name: Keep the result for the pull-request job
+        if: steps.diff.outputs.changed == 'true'
+        run: mkdir -p build && cp "$RUNNER_TEMP/report.md" build/report.md
+      - if: steps.diff.outputs.changed == 'true'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: proto-update
+          path: |
+            proto
+            history
+            generator/field-ids.lock.json
+            build/report.md
+          retention-days: 3
+
+  # The only job that can write, and only on main.
+  pull-request:
+    needs: generate
+    if: >-
+      needs.generate.outputs.changed == 'true' &&
+      github.ref == 'refs/heads/main' &&
+      inputs.dry_run != true
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    concurrency:
+      group: generate-proto-main
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Replace proto/ with the generated tree
+        run: rm -rf proto
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: proto-update
+          path: .
       - name: Open or update the pull request
-        if: steps.diff.outputs.changed == 'true' && env.DRY_RUN != 'true'
-        uses: peter-evans/create-pull-request@v8.1.3
+        # No `labels` input: whether the label API creates a missing label is
+        # not documented (#5), and nothing depends on the label.
+        uses: peter-evans/create-pull-request@3ffccacd46053766916f087ce41d627c0b8cf2d1 # v8.1.3
         with:
           branch: generator/proto-update
           delete-branch: true
@@ -146,5 +180,4 @@ jobs:
             generator/field-ids.lock.json
           commit-message: Regenerate SpaceFOM .proto files
           title: Regenerate SpaceFOM .proto files
-          body-path: ${{ runner.temp }}/report.md
-          labels: generated
+          body-path: build/report.md
