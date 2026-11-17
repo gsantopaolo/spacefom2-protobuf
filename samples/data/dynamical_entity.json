@@ -1,0 +1,41 @@
+{
+  "name": "Lander1",
+  "type": "Lander",
+  "status": "Active",
+  "parent_reference_frame": "EarthFrame",
+  "state": {
+    "translational_state": {
+      "position": {
+        "x": 6778137.0
+      },
+      "velocity": {
+        "y": 7668.6
+      }
+    },
+    "rotational_state": {
+      "attitude_quaternion": {
+        "scalar": 1.0
+      }
+    },
+    "time": 1.5
+  },
+  "center_of_mass": {
+    "z": 0.3
+  },
+  "force": {
+    "x": 100.5
+  },
+  "mass": 15000.0,
+  "mass_rate": -1.25,
+  "inertia": [
+    1000.0,
+    0.0,
+    0.0,
+    0.0,
+    2000.0,
+    0.0,
+    0.0,
+    0.0,
+    3000.0
+  ]
+}

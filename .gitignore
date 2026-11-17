@@ -14,3 +14,10 @@ dist/
 
 # Private reference material (never commit)
 reference-docs/
+
+# Samples
+samples/node_modules/
+samples/**/bin/
+samples/**/obj/
+samples/**/target/
+samples/cpp/build/

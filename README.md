@@ -33,6 +33,7 @@ Federation roles, synchronization and time management stay in HLA; the schema is
 | [Verification](docs/verification.md) | Every technical claim, with the clause of the standard it was checked against |
 | [Generator and CI plan](docs/plans/generator-ci-plan.md) | Approved plan for the FOM XML → `.proto` generator and the GitHub Action that opens update PRs |
 | [Generated schema](proto/siso/spacefom/v1/) | The `.proto` files generated from the SpaceFOM 1.0 FOM modules, package `siso.spacefom.v1` |
+| [Samples](samples/README.md) | Generated code, a reader program and tests in C++, Python, Java, C#, TypeScript and Go, and the two-workflow pipeline that keeps them in step with the FOM |
 
 ## Example
 
@@ -56,6 +57,7 @@ message ReferenceFrame {
 
 - [x] Proposal, draft PCR and verified example schema
 - [x] FOM XML → `.proto` generator, with CI
+- [x] Generated code, samples and tests in six languages
 - [ ] Bridge federate: HLA updates → Protobuf → Kafka / gRPC
 - [ ] Docker Compose demo: sample federation, bridge and non-HLA consumers
 - [ ] Technical documentation and diagrams for the PDG hearing (first version: [technical briefing](docs/hearing/technical-briefing.md))
@@ -106,6 +108,7 @@ fom/         SOURCE.json: pinned upstream commit and sha256 of each FOM module
 generator/   the FOM XML -> .proto generator, its tests and the field-number lock file
 proto/       generated .proto files (do not edit by hand)
 history/     earlier generated trees, added by CI when the output changes
+samples/     generated code and tests in six languages (see samples/README.md)
 ```
 
 [trickhla]: https://github.com/nasa/TrickHLA/tree/master/FOMs/SpaceFOM
