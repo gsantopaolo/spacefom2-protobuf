@@ -34,6 +34,11 @@ env:
   # sha256 of protoc-36.2-linux-x86_64.zip from the v36.2 GitHub release.
   PROTOC_SHA256: 121f6c7afe1d4d0e3ea6aab9432038599250134cbf4474cb1167d2c7decd4278
   PROTOC_GEN_GO_VERSION: v1.36.12
+  # https://github.com/bufbuild/buf/releases/tag/v1.75.0
+  BUF_VERSION: "1.75.0"
+  # sha256 of buf-Linux-x86_64 (the binary buf-action downloads and checks)
+  # from sha256.txt in that release.
+  BUF_SHA256: fad1e38d6909bbb583a4da81d8c02a01046e2cd663bde7e337dd24277393764b
 
 jobs:
   # On a pull request, the committed samples may be stale when only their inputs
@@ -77,6 +82,8 @@ jobs:
       - uses: bufbuild/buf-action@37ac33d8960807670a6e9719080e885197b09cc6 # v1.7.0
         with:
           setup_only: true
+          version: ${{ env.BUF_VERSION }}
+          checksum: ${{ env.BUF_SHA256 }}
       - name: Generate bindings and sample data
         run: |
           protoc --version

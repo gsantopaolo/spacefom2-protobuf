@@ -34,6 +34,11 @@ permissions:
 env:
   PYTHON_VERSION: "3.11"
   FOM_DIR: build/fom
+  # https://github.com/bufbuild/buf/releases/tag/v1.75.0
+  BUF_VERSION: "1.75.0"
+  # sha256 of buf-Linux-x86_64 (the binary buf-action downloads and checks)
+  # from sha256.txt in that release.
+  BUF_SHA256: fad1e38d6909bbb583a4da81d8c02a01046e2cd663bde7e337dd24277393764b
 
 jobs:
   # Every event: regenerate, then validate the fresh output. All validation runs
@@ -81,6 +86,8 @@ jobs:
       - uses: bufbuild/buf-action@37ac33d8960807670a6e9719080e885197b09cc6 # v1.7.0
         with:
           setup_only: true
+          version: ${{ env.BUF_VERSION }}
+          checksum: ${{ env.BUF_SHA256 }}
       - run: buf lint
       - name: buf breaking (WIRE) against the base branch
         env:
