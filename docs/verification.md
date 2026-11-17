@@ -31,6 +31,7 @@ Every technical statement in the proposal was checked against the primary source
 | `buf.yaml` v2 keys `modules.path`, `lint.use`/`except` and `breaking.use`; `WIRE` breaking category | [buf.yaml v2 reference][buf-yaml]; [buf breaking rules][buf-breaking] |
 | The "Run workflow" button for `workflow_dispatch` appears only when the workflow file is on the default branch | [GitHub Docs, events that trigger workflows][gh-events] |
 | Events triggered with `GITHUB_TOKEN` do not start new workflow runs (except `workflow_dispatch` and `repository_dispatch`), so the generator job validates before it opens the PR | [GitHub Docs, triggering a workflow][gh-trigger] |
+| Since 11 June 2026, `pull_request` workflows on PRs created by `github-actions[bot]` run only after a user with write access approves them; observed on bot PRs #22 and #23 on 17 November 2026 | [GitHub changelog, 11 June 2026][gh-bot-approval]; PRs [#22][pr22] and [#23][pr23] |
 | Action inputs used: `create-pull-request` v8.1.3 (`branch`, `delete-branch`, `add-paths`, `body-path`), `buf-action` v1.7.0 (`setup_only`), `setup-python` v7.1.0 (`cache`, `cache-dependency-path`) | `action.yml` at each tag: [create-pull-request][cpr-action], [buf-action][buf-action], [setup-python][sp-action] |
 | Protobuf generated code must "never" run on a runtime older than the protoc that generated it; C++ and Rust require "an exact match between the generated code version and the runtime version" | [Protobuf cross-version runtime guarantee][xver] |
 | Languages built into `protoc`: C++, C#, Java, Kotlin, Objective-C, PHP, Python, Ruby; Go and Dart use Google-supported plugins | [Protobuf overview][pb-overview] |
@@ -111,3 +112,6 @@ FOM XML: SpaceFOM 1.0 modules as distributed in [nasa/TrickHLA][trickhla]; links
 [runner-images]: https://github.com/actions/runner-images#available-images
 [runner-2604]: https://github.com/actions/runner-images/blob/main/images/ubuntu/Ubuntu2604-Readme.md
 [al-config]: https://github.com/rhysd/actionlint/blob/v1.7.12/docs/config.md
+[gh-bot-approval]: https://github.blog/changelog/2026-06-11-bot-created-pull-requests-can-run-workflows-if-approved/
+[pr22]: https://github.com/gsantopaolo/spacefom2-protobuf/pull/22
+[pr23]: https://github.com/gsantopaolo/spacefom2-protobuf/pull/23

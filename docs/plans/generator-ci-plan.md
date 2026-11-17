@@ -115,7 +115,7 @@ The strategy is a committed lock file, `generator/field-ids.lock.json`:
 3. Install the pinned dependencies (`grpcio-tools`, `pytest`).
 4. If not vendored, fetch the FOM XML at the commit pinned in `fom/SOURCE.json` and verify the sha256 values.
 5. Copy the current `proto/` to a temp directory, then run the generator, which writes `proto/` and the lock file.
-6. Run the validation from §5. **Validation must pass here, inside this job:** a PR opened with the default `GITHUB_TOKEN` does not trigger `pull_request` workflows. "Events triggered by the `GITHUB_TOKEN` will not create a new workflow run" except `workflow_dispatch` and `repository_dispatch` [S4][S5].
+6. Run the validation from §5. **Validation must pass here, inside this job:** a PR opened with the default `GITHUB_TOKEN` does not run `pull_request` workflows on its own. "Events triggered by the `GITHUB_TOKEN` will not create a new workflow run" except `workflow_dispatch` and `repository_dispatch` [S4][S5]. Since June 2026, those workflows wait for a user with write access to approve them ([GitHub changelog, 11 June 2026](https://github.blog/changelog/2026-06-11-bot-created-pull-requests-can-run-workflows-if-approved/)); the end-to-end test on 17 November 2026 showed exactly that on bot PRs #22 and #23.
 7. `git diff --quiet -- proto/ generator/field-ids.lock.json`. If nothing changed, stop.
 8. Otherwise, move the temp copy into `history/<UTC-timestamp>_<fom-sha7>/` and add a `MANIFEST.json` (previous FOM sha256 values, generator version, the source commit of `main`).
 9. Open the PR with `peter-evans/create-pull-request@v8`, pinned to v8.1.3, the latest release [S1][S17]:
