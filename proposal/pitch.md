@@ -11,7 +11,7 @@ SpaceFOM data can only be consumed by software that speaks HLA: reference frames
 The SpaceFOM datatypes map cleanly onto Protocol Buffers: SpaceFOM 1.0 uses only four basic representations and no variant records (§8.7.2). SpaceFOM 2.0 could therefore publish a `.proto` schema, generated mechanically from the FOM XML, alongside its FOM modules. The proposal has three parts:
 
 - a deterministic FOM-to-proto mapping, as an informative annex;
-- a reference generator that runs in CI, so the schema stays in step with the FOM, including 2.0 changes such as configurable time resolution;
+- a reference generator that runs in CI, so the schema stays in step with the FOM. It is proven on the SpaceFOM 1.0 modules and will be extended for 2.0 changes, such as configurable time resolution, as the 2.0 FOM drafts appear;
 - a reference bridge federate that republishes HLA updates as Protobuf on Kafka or gRPC.
 
 <p align="center"><img src="../docs/images/bridge-architecture.svg" alt="HLA stays inside the federation; Protobuf carries SpaceFOM data out" width="640"></p>
@@ -20,7 +20,7 @@ Roles, synchronization and time management stay in HLA, which remains the source
 
 ## Expected benefits
 
-- SpaceFOM data becomes usable by MBSE, data-analysis, cloud and robotics tools, next to the existing SMP and FMI bridges.
+- SpaceFOM data becomes usable by MBSE, data-analysis, cloud and robotics tools.
 - Any language with a Protobuf code generator gets typed SpaceFOM classes, so nobody writes HLA decoders by hand.
 - It matches HLA 4, which already uses Protobuf for its services layer.
 - Federation runs can be streamed, recorded and replayed with standard tooling.
@@ -34,4 +34,4 @@ The work is open source at **[github.com/gsantopaolo/spacefom2-protobuf](https:/
 
 **[Gian Paolo Santopaolo](https://www.linkedin.com/in/gianpaolosantopaolo/)**, Senior AI/ML Engineer at Alloy Therapeutics (headquartered in Waltham, MA, USA; based in Basel, Switzerland), a position reached through experience rather than a formal engineering degree, where he leads the design and deployment of conversational and agentic AI systems that let scientists work with proprietary research data. More than 20 years architecting and implementing highly available, highly scalable, distributed real-time systems worldwide; long-time Protocol Buffers user and speaker; former Microsoft Regional Director and Microsoft MVP. Available to present the idea with a working demo and to act as lead analyst for the PCR.
 
-<sub>Prepared with Claude (Anthropic) as a research and drafting aid; every technical fact was checked against SISO-STD-018-2020 and the SpaceFOM FOM XML. I reviewed it and stand behind it. Details: [technical overview](https://github.com/gsantopaolo/spacefom2-protobuf/blob/main/docs/technical-overview.md) · [draft PCR](https://github.com/gsantopaolo/spacefom2-protobuf/blob/main/proposal/pcr-draft.md) · [verification](https://github.com/gsantopaolo/spacefom2-protobuf/blob/main/docs/verification.md).</sub>
+<sub>Prepared with Claude (Anthropic) as a research and drafting aid; every technical fact was checked against the primary sources listed in [verification](https://github.com/gsantopaolo/spacefom2-protobuf/blob/main/docs/verification.md). I reviewed it and stand behind it. Details: [technical overview](https://github.com/gsantopaolo/spacefom2-protobuf/blob/main/docs/technical-overview.md) · [draft PCR](https://github.com/gsantopaolo/spacefom2-protobuf/blob/main/proposal/pcr-draft.md).</sub>

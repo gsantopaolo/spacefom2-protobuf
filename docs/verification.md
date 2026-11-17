@@ -21,18 +21,25 @@ Every technical statement in the proposal was checked against the primary source
 | HLA 4 keeps HLA data encodings and adds `HLAextendableVariantRecord` | [SISO SIW 2026-028][siw26-p6] |
 | In the Federate Protocol, attribute and parameter values are opaque `bytes`; Protobuf defines only the service envelope | IEEE 1516.1 Federate Protocol `datatypes.proto` (package `rti1516_2024.fedpro`, 2024 draft): [`AttributeHandleValue` L167–170][fp-ahv], [`ParameterHandleValue` L178–181][fp-phv], as published in the [HLA4FP open-source server][fp-repo]. Same layout in the 2025 generated code of [`@hla4ts/proto` 0.1.1][hla4ts] and [VTMAK Python-Federate-Protocol][vtmak]. "Reprinted with permission from IEEE 1516.1(TM)-2024" |
 | SpaceFOM 2.0 topics: configurable time resolution, epoch 2000, HLA 4 directed interactions and `Reference` datatype | SIMposium 2026 presentation, [slide 17][sim17] and [slide 19][sim19] |
+| The PCR form's Block 2 has Phone 2 (DSN/Cell), Present Lead Analyst and Lead Analyst email; the form is submitted "to the Product Support Group" | [SISO-ADM-003-2011 Appendix A, pages A-1 and A-3][adm-a] |
 | Proposed changes are collected as PCRs by the SpaceFOM PSG | [SISO SIW 2025 SpaceFOM paper §3.4][siw25-p7]; [SISO-ADM-003 Appendix A][adm-a] |
 | SpaceFOM 2 Product Nomination (SISO-PN-038-DRAFT, PN form Rev 4): SAC approval 05/20/2026; ticks "SISO Product Data Files (supplementary files, e.g., XML, XML Schemas, UML, JSON, etc.)"; V2 capabilities "including, but not limited to" the listed ones; circulation package to SAC planned 7/1/2027 | [SISO-PN-038-DRAFT][pn038], §1.3, §1.4, §1.5, as listed on SISO's [Forms & Templates][siso-forms] page |
 | `MTRMode` values are 2, 3, 4 (no 0); `ExecutionMode` starts at `EXEC_MODE_UNINITIALIZED = 0` | [`SISO_SpaceFOM_management.xml` L227–268][xml-enums] |
 | `DynamicalEntity` is nested inside `PhysicalEntity` in the FOM (a subclass), so the generator flattens it | [`SISO_SpaceFOM_entity.xml` L172–242][xml-dyn] |
+| `PhysicalEntity.name` has `updateType` Static, so periodic updates do not carry it | [`SISO_SpaceFOM_entity.xml` L74–76][xml-name] |
+| The TrickHLA XML's `PhysicalEntity` semantics say "Space FOM" and "(see 6.2.2)", where Appendix C prints "SpaceFOM" and "(see Section 5.2.2)" | [`SISO_SpaceFOM_entity.xml` L68–70][xml-pe-sem]; [SISO-STD-018-2020 page 133][std133] |
+| The FOM has three 9-element `HLAfixedArray` types (`InertiaMatrix`, `Matrix`, `InertiaRateMatrix`); only `DynamicalEntity.inertia` and `inertia_rate` use them | [`SISO_SpaceFOM_datatypes.xml` L266–307][xml-matrix]; `SISO_SpaceFOM_entity.xml` L222 and L233 at the same commit |
 | `ExecutionConfiguration.least_common_time_step` is `HLAinteger64Time` | [`SISO_SpaceFOM_management.xml` L143–147][xml-lcts] |
 | proto3: the first enum value must be zero; field numbers 19,000–19,999 are reserved for the implementation; a field number "cannot be changed once your message type is in use" and "should never be reused" | [Protobuf proto3 language guide][proto3] |
+| CI installs buf 1.75.0 and checks its sha256, `fad1e38d6909bbb583a4da81d8c02a01046e2cd663bde7e337dd24277393764b` for the `buf-Linux-x86_64` asset; `buf-action` at `37ac33d` fails the step on a mismatch | [`sha256.txt` of buf v1.75.0][buf-sums]; [`src/installer.ts` L187–190 at `37ac33d`][buf-installer] |
+| The C++ sample pins protobuf v36.2 to commit `2c74169b` and Abseil 20250512.1 to commit `76bb2432` (the commits the tags point to, annotated tag dereferenced) | `git ls-remote` of [protocolbuffers/protobuf][pb-repo] and [abseil/abseil-cpp][absl-repo], 2026-11-17 |
 | buf `STANDARD` lint flags the FOM's enum names under `ENUM_VALUE_PREFIX` and `ENUM_ZERO_VALUE_SUFFIX`, and nothing else in the generated files | [buf lint rules][buf-lint]; run locally with buf 1.75.0 on 2026-11-17 |
+| buf's `WIRE` breaking category includes `FIELD_WIRE_COMPATIBLE_TYPE`, so a wire-incompatible type change fails `buf breaking` | [buf breaking rules][buf-breaking], checked 2026-11-17 |
 | `buf.yaml` v2 keys `modules.path`, `lint.use`/`except` and `breaking.use`; `WIRE` breaking category | [buf.yaml v2 reference][buf-yaml]; [buf breaking rules][buf-breaking] |
 | The "Run workflow" button for `workflow_dispatch` appears only when the workflow file is on the default branch | [GitHub Docs, events that trigger workflows][gh-events] |
 | Events triggered with `GITHUB_TOKEN` do not start new workflow runs (except `workflow_dispatch` and `repository_dispatch`), so the generator job validates before it opens the PR | [GitHub Docs, triggering a workflow][gh-trigger] |
 | Since 11 June 2026, `pull_request` workflows on PRs created by `github-actions[bot]` run only after a user with write access approves them; observed on bot PRs #22 and #23 on 17 November 2026 | [GitHub changelog, 11 June 2026][gh-bot-approval]; PRs [#22][pr22] and [#23][pr23] |
-| Action inputs used: `create-pull-request` v8.1.3 (`branch`, `delete-branch`, `add-paths`, `body-path`), `buf-action` v1.7.0 (`setup_only`), `setup-python` v7.1.0 (`cache`, `cache-dependency-path`) | `action.yml` at each tag: [create-pull-request][cpr-action], [buf-action][buf-action], [setup-python][sp-action] |
+| Action inputs used: `create-pull-request` v8.1.3 (`branch`, `delete-branch`, `add-paths`, `body-path`), `buf-action` v1.7.0 (`setup_only`, `version`, `checksum`), `setup-python` v7.1.0 (`cache`, `cache-dependency-path`) | `action.yml` at each tag: [create-pull-request][cpr-action], [buf-action][buf-action], [setup-python][sp-action] |
 | Protobuf generated code must "never" run on a runtime older than the protoc that generated it; C++ and Rust require "an exact match between the generated code version and the runtime version" | [Protobuf cross-version runtime guarantee][xver] |
 | Languages built into `protoc`: C++, C#, Java, Kotlin, Objective-C, PHP, Python, Ruby; Go and Dart use Google-supported plugins | [Protobuf overview][pb-overview] |
 | protobuf-es generates TypeScript/JavaScript; Google's protobuf-javascript has "minimal support" | [protobuf-es][pb-es]; [protobuf-javascript][pb-js] |
@@ -53,7 +60,7 @@ Every technical statement in the proposal was checked against the primary source
 - No source states in words that these bytes are HLA-encoded; that follows from the HLA encoding model rather than from the `.proto` text.
 - Whether [SISO-ADM-003-2011][adm] is still the current PCR form.
 
-FOM XML: SpaceFOM 1.0 modules as distributed in [nasa/TrickHLA][trickhla]; links are pinned to commit [`ed05f1b`][xml-commit] (2020-06-04), the last change to `SISO_SpaceFOM_datatypes.xml`. Links to the entity and management modules are pinned to [`1677fd0`][fom-commit] (2025-12-02), the commit the generator downloads (see `fom/SOURCE.json`). The four files at that commit have the sha256 values recorded there.
+FOM XML: SpaceFOM 1.0 modules as distributed in [nasa/TrickHLA][trickhla]; the four pinned files were last changed in [`ed05f1b`][xml-commit] (2020-06-04), and links to `SISO_SpaceFOM_datatypes.xml` are pinned to that commit. The generator downloads the files at [`1677fd0`][fom-commit] (2025-12-02), the last commit that touched the `FOMs/SpaceFOM` folder (see `fom/SOURCE.json`), and links to the entity and management modules are pinned to it. The four files at that commit have the sha256 values recorded there.
 
 [std]: https://cdn.ymaws.com/www.sisostandards.org/resource/resmgr/standards_products/siso-std-018-2020_srfom.pdf
 [std101]: https://cdn.ymaws.com/www.sisostandards.org/resource/resmgr/standards_products/siso-std-018-2020_srfom.pdf#page=101
@@ -90,7 +97,14 @@ FOM XML: SpaceFOM 1.0 modules as distributed in [nasa/TrickHLA][trickhla]; links
 [xml-lcts]: https://github.com/nasa/TrickHLA/blob/1677fd0e0e3ff45d6bff712169c463e38ede5586/FOMs/SpaceFOM/SISO_SpaceFOM_management.xml#L143-L147
 [xml-dyn]: https://github.com/nasa/TrickHLA/blob/1677fd0e0e3ff45d6bff712169c463e38ede5586/FOMs/SpaceFOM/SISO_SpaceFOM_entity.xml#L172-L242
 [proto3]: https://protobuf.dev/programming-guides/proto3/
+[xml-name]: https://github.com/nasa/TrickHLA/blob/ed05f1b2f0bada22fffe12c1d5d5b551bbcfa91b/FOMs/SpaceFOM/SISO_SpaceFOM_entity.xml#L74-L76
+[xml-pe-sem]: https://github.com/nasa/TrickHLA/blob/ed05f1b2f0bada22fffe12c1d5d5b551bbcfa91b/FOMs/SpaceFOM/SISO_SpaceFOM_entity.xml#L68-L70
+[xml-matrix]: https://github.com/nasa/TrickHLA/blob/ed05f1b2f0bada22fffe12c1d5d5b551bbcfa91b/FOMs/SpaceFOM/SISO_SpaceFOM_datatypes.xml#L266-L307
 [buf-lint]: https://buf.build/docs/lint/rules/
+[buf-sums]: https://github.com/bufbuild/buf/releases/download/v1.75.0/sha256.txt
+[buf-installer]: https://github.com/bufbuild/buf-action/blob/37ac33d8960807670a6e9719080e885197b09cc6/src/installer.ts#L187-L190
+[pb-repo]: https://github.com/protocolbuffers/protobuf/releases/tag/v36.2
+[absl-repo]: https://github.com/abseil/abseil-cpp/releases/tag/20250512.1
 [buf-yaml]: https://buf.build/docs/configuration/v2/buf-yaml/
 [buf-breaking]: https://buf.build/docs/breaking/rules/
 [gh-events]: https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows

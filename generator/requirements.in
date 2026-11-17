@@ -1,0 +1,6 @@
+# Direct dependencies. Edit this file, then regenerate the hashed lock
+# requirements.txt next to it with pip-tools 7.7.0 on Python 3.11:
+#   pip-compile --generate-hashes --allow-unsafe --strip-extras --no-emit-index-url \
+#     --output-file generator/requirements.txt generator/requirements.in
+grpcio-tools==1.85.1
+pytest==9.2.0

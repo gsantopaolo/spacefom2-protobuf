@@ -8,6 +8,7 @@ import urllib.request
 from pathlib import Path
 
 from .model import GeneratorError
+from .parse import module_key
 
 RAW_BASE = "https://raw.githubusercontent.com"
 
@@ -18,6 +19,9 @@ def raw_url(source: dict, name: str) -> str:
 
 
 def fetch(source: dict, dest: Path) -> list[Path]:
+    # Names become paths under dest: check them all before anything is written.
+    for entry in source["files"]:
+        module_key(entry["name"])
     dest.mkdir(parents=True, exist_ok=True)
     paths = []
     for entry in source["files"]:

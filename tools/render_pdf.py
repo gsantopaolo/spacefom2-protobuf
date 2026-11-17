@@ -4,8 +4,10 @@ The Markdown stays the only source. Relative links to other repository files are
 rewritten to their GitHub URLs, so they still work when the PDF or .docx is sent
 on its own.
 
-Needs: pandoc (https://pandoc.org), Google Chrome (for the PDF) and rsvg-convert
-from librsvg (SVG to PNG for Word). On macOS: brew install pandoc librsvg.
+Needs: pandoc (https://pandoc.org), Google Chrome or Chromium (for the PDF) and
+rsvg-convert from librsvg (SVG to PNG for Word). On macOS: brew install pandoc librsvg.
+Chrome is taken from the CHROME environment variable if set, else the first of
+CHROME_NAMES on PATH, else the default macOS install.
 Usage (from the repository root):
     python tools/render_pdf.py proposal/pitch.md     # writes build/pitch.html, build/pitch.pdf, build/pitch.docx
     python tools/render_pdf.py proposal/pitch.md --out proposal && rm proposal/pitch.html
@@ -15,7 +17,9 @@ Usage (from the repository root):
 from __future__ import annotations
 
 import argparse
+import os
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -23,7 +27,8 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
 GITHUB = "https://github.com/gsantopaolo/spacefom2-protobuf/blob/main/"
-CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+CHROME_NAMES = ("google-chrome", "google-chrome-stable", "chromium", "chromium-browser", "chrome")
+MACOS_CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 CSS = Path(__file__).with_name("print.css")
 
 LINK = re.compile(r"\]\((?!https?:|mailto:|#|/)([^)#\s]+)(#[^)\s]*)?\)")
@@ -55,6 +60,25 @@ def prepare(source: Path, raster_dir: Path | None = None) -> str:
     return LINK.sub(link, text)
 
 
+def find_chrome(env=os.environ, which=shutil.which, macos_chrome: str = MACOS_CHROME) -> str:
+    """Return the Chrome executable to print the PDF with; exit with a message if there is none."""
+    if env.get("CHROME"):
+        chrome = env["CHROME"]
+        if not (os.path.isfile(chrome) and os.access(chrome, os.X_OK)):
+            sys.exit(f"error: CHROME={chrome} is not an executable file")
+        return chrome
+    for name in CHROME_NAMES:
+        found = which(name)
+        if found:
+            return found
+    if os.path.isfile(macos_chrome):
+        return macos_chrome
+    sys.exit(
+        "error: Chrome not found. Set CHROME to its executable, or put one of "
+        f"{', '.join(CHROME_NAMES)} on PATH."
+    )
+
+
 def pandoc(markdown_text: str, out: Path, *extra: str) -> None:
     subprocess.run(
         ["pandoc", "--from=gfm+attributes", "--output", str(out), *extra],
@@ -68,6 +92,7 @@ def main() -> int:
     parser.add_argument("--out", type=Path, default=REPO / "build", help="output folder (default: build/)")
     args = parser.parse_args()
 
+    chrome = find_chrome()
     source = args.source.resolve()
     text = prepare(source)
     title = next((line[2:].strip() for line in text.splitlines() if line.startswith("# ")), source.stem)
@@ -82,7 +107,7 @@ def main() -> int:
     Path(css_header.name).unlink()
 
     pdf = stem.with_suffix(".pdf")
-    subprocess.run([CHROME, "--headless=new", "--disable-gpu", "--no-pdf-header-footer",
+    subprocess.run([chrome, "--headless=new", "--disable-gpu", "--no-pdf-header-footer",
                     f"--print-to-pdf={pdf}", html.resolve().as_uri()], check=True, capture_output=True)
 
     docx = stem.with_suffix(".docx")

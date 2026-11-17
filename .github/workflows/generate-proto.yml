@@ -11,7 +11,9 @@ on:
         type: boolean
         default: false
   push:
-    # On main this opens the update PR; on any other branch it is a dry run.
+    # Opens the update PR. Other branches are checked by the pull_request run
+    # below, or by hand with workflow_dispatch and dry_run.
+    branches: [main]
     paths:
       - fom/**
       - generator/**
@@ -34,12 +36,18 @@ permissions:
 env:
   PYTHON_VERSION: "3.11"
   FOM_DIR: build/fom
+  # https://github.com/bufbuild/buf/releases/tag/v1.75.0
+  BUF_VERSION: "1.75.0"
+  # sha256 of buf-Linux-x86_64 (the binary buf-action downloads and checks)
+  # from sha256.txt in that release.
+  BUF_SHA256: fad1e38d6909bbb583a4da81d8c02a01046e2cd663bde7e337dd24277393764b
 
 jobs:
-  # Every event: regenerate, then validate the fresh output. All validation runs
-  # here, because a PR opened with GITHUB_TOKEN does not trigger other workflows
-  # (plan §6, step 6). Read-only: dry runs and pull requests never get write
-  # permissions (#4).
+  # Every event: regenerate, then validate the fresh output, so the run that
+  # opens the bot PR has already checked it. The bot PR's own pull_request runs
+  # start only after a maintainer approves them (GitHub changelog, 2026-06-11:
+  # https://github.blog/changelog/2026-06-11-bot-created-pull-requests-can-run-workflows-if-approved/).
+  # Read-only: dry runs and pull requests never get write permissions (#4).
   #
   # On a pull request, the committed proto/ may be stale when only the inputs
   # changed; the bot regenerates it after the merge. Hand-edited output that
@@ -59,7 +67,7 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: pip
           cache-dependency-path: generator/requirements.txt
-      - run: pip install -r generator/requirements.txt
+      - run: pip install --require-hashes -r generator/requirements.txt
       - name: Tests for the pull-request decision logic
         run: python -m pytest tools -q
       - name: Fetch pinned FOM modules
@@ -81,6 +89,8 @@ jobs:
       - uses: bufbuild/buf-action@37ac33d8960807670a6e9719080e885197b09cc6 # v1.7.0
         with:
           setup_only: true
+          version: ${{ env.BUF_VERSION }}
+          checksum: ${{ env.BUF_SHA256 }}
       - run: buf lint
       - name: buf breaking (WIRE) against the base branch
         env:
@@ -104,12 +114,12 @@ jobs:
           fi
       - name: Pull request - is the committed output acceptable?
         if: github.event_name == 'pull_request'
-        env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
         # `shell: bash` runs with -o pipefail, so a failing check is not hidden by tee.
         shell: bash
+        # HEAD is the PR merge commit and HEAD^1 the base it was merged onto, so
+        # the list holds only this PR's files even if the base branch moved on.
         run: |
-          git diff --name-only "$BASE_SHA" HEAD > "$RUNNER_TEMP/changed.txt"
+          git diff --name-only HEAD^1 HEAD > "$RUNNER_TEMP/changed.txt"
           python tools/generated_output_check.py --name proto \
             --output proto/ --output generator/field-ids.lock.json \
             --input fom/ --input generator/ --input buf.yaml \

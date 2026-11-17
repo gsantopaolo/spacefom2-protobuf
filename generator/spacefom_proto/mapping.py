@@ -147,7 +147,7 @@ class Mapper:
             raise GeneratorError(f"array {decl.name}: unsupported encoding {decl.encoding!r}")
         element = self._element(decl)
         if decl.cardinality == MATRIX_CARDINALITY:
-            return None  # inlined as repeated double where used
+            return None  # inlined as repeated double where used, with its semantics
         if decl.cardinality != len(VECTOR_COMPONENTS):
             raise GeneratorError(f"array {decl.name}: unsupported cardinality {decl.cardinality}")
         self._check_message_name(decl.name)
@@ -234,11 +234,16 @@ class Mapper:
                 f"{decl.name}: {decl.units or 'no units given'}",
             )
         if isinstance(decl, ArrayType) and decl.cardinality == MATRIX_CARDINALITY:
+            # The matrix type has no message of its own, so its semantics
+            # (element order, sign conventions) go on each field that uses it.
             element = self._element(decl)
-            note = f"{decl.name}: 3x3, 9 elements row-wise; {element.name}: {element.units}"
+            matrix = _paragraphs(decl.semantics)
+            if matrix:
+                matrix[0] = f"{decl.name}: {matrix[0]}"
+            note = f"{decl.name}: 3x3 as 9 elements in HLA array order; {_unit_note(element)}"
             return ProtoField(
                 member.name, SIMPLE_REPRESENTATIONS[element.representation], "repeated",
-                comment, note,
+                comment + matrix, note,
             )
         if isinstance(decl, (ArrayType, RecordType, EnumType)):
             return ProtoField(member.name, decl.name, label, comment)

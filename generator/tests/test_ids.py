@@ -1,6 +1,17 @@
 import json
 
-from spacefom_proto.ids import assign, dump_lock, empty_lock, reserved
+import pytest
+
+from spacefom_proto.ids import (
+    LOCK_FORMAT,
+    assign,
+    dump_lock,
+    empty_lock,
+    load_lock,
+    load_renames,
+    reserved,
+)
+from spacefom_proto.model import GeneratorError
 
 
 def test_first_run_numbers_follow_fom_order():
@@ -40,21 +51,100 @@ def test_rename_without_map_needs_review():
     assert changes.needs_review() == ["M"]
 
 
-def test_rename_map_keeps_number():
+def test_rename_of_live_field_keeps_number_and_reserves_old_name():
     lock, _ = assign(empty_lock(), {"M": ["a", "old"]})
-    lock["renames"] = {"M": {"new": "old"}}
-    lock, changes = assign(lock, {"M": ["a", "new"]})
+    lock, changes = assign(lock, {"M": ["a", "new"]}, {"M": {"new": "old"}})
     assert lock["messages"]["M"]["fields"] == {"a": 1, "new": 2}
     assert changes.renamed == [("M", "old", "new", 2)]
+    assert changes.added == [] and changes.retired == []
     assert changes.needs_review() == []
-    # Applied after the fact (old already retired): still keeps the number,
-    # and the old name stays reserved.
-    lock2, _ = assign(empty_lock(), {"M": ["a", "old"]})
-    lock2, _ = assign(lock2, {"M": ["a"]})
-    lock2["renames"] = {"M": {"new": "old"}}
-    lock2, _ = assign(lock2, {"M": ["a", "new"]})
-    assert lock2["messages"]["M"]["fields"]["new"] == 2
-    assert reserved(lock2["messages"]["M"]) == ([], ["old"])
+    assert reserved(lock["messages"]["M"]) == ([], ["old"])
+
+
+def test_rename_of_retired_field_keeps_number_and_reserves_old_name():
+    lock, _ = assign(empty_lock(), {"M": ["a", "old"]})
+    lock, _ = assign(lock, {"M": ["a"]})
+    lock, changes = assign(lock, {"M": ["a", "new"]}, {"M": {"new": "old"}})
+    assert lock["messages"]["M"]["fields"]["new"] == 2
+    assert changes.renamed == [("M", "old", "new", 2)]
+    assert reserved(lock["messages"]["M"]) == ([], ["old"])
+
+
+def test_applied_rename_is_skipped_on_later_runs():
+    renames = {"M": {"new": "old"}}
+    lock, _ = assign(empty_lock(), {"M": ["a", "old"]})
+    lock, _ = assign(lock, {"M": ["a", "new"]}, renames)
+    again, changes = assign(lock, {"M": ["a", "new"]}, renames)
+    assert again == lock and changes.empty()
+    # A later rename of the new name chains on; the first entry stays history.
+    renames["M"]["newer"] = "new"
+    lock, changes = assign(lock, {"M": ["a", "newer"]}, renames)
+    assert lock["messages"]["M"]["fields"] == {"a": 1, "newer": 2}
+    assert changes.renamed == [("M", "new", "newer", 2)]
+    assert reserved(lock["messages"]["M"]) == ([], ["new", "old"])
+
+
+def test_rename_fails_when_new_name_already_has_a_number():
+    lock, _ = assign(empty_lock(), {"M": ["a", "old"]})
+    lock, _ = assign(lock, {"M": ["a", "new"]})  # new = 3, old retired at 2
+    message = "already gives 'new' number 3, so it cannot take number 2 from 'old'"
+    with pytest.raises(GeneratorError, match=message):
+        assign(lock, {"M": ["a", "new"]}, {"M": {"new": "old"}})
+
+
+@pytest.mark.parametrize(
+    "renames, fields, message",
+    [
+        ({"M": {"new": "nope"}}, ["a", "new"], "no number for 'nope'"),
+        ({"M": {"new": "old"}}, ["a", "old", "new"], "still has 'old'"),
+        ({"M": {"gone": "old"}}, ["a"], "has no field 'gone'"),
+        ({"X": {"new": "old"}}, ["a", "old"], "X: no such message"),
+        ({"M": {"x": "x"}}, ["a", "old"], "renamed to itself"),
+        ({"M": {"x": "old", "y": "old"}}, ["a", "old"], "listed for two new names"),
+        ({"M": ["new", "old"]}, ["a", "old"], "expected"),
+    ],
+)
+def test_bad_rename_fails_loudly(renames, fields, message):
+    lock, _ = assign(empty_lock(), {"M": ["a", "old"]})
+    with pytest.raises(GeneratorError, match=message):
+        assign(lock, {"M": fields}, renames)
+
+
+def test_load_renames(tmp_path):
+    path = tmp_path / "renames.json"
+    path.write_text('{"M": {"new": "old"}}')
+    assert load_renames(path) == {"M": {"new": "old"}}
+    with pytest.raises(GeneratorError, match="not found"):
+        load_renames(tmp_path / "missing.json")
+    path.write_text("{")
+    with pytest.raises(GeneratorError, match="invalid JSON"):
+        load_renames(path)
+    path.write_text("[]")
+    with pytest.raises(GeneratorError, match="expected"):
+        load_renames(path)
+
+
+def test_format_1_lock_is_migrated(tmp_path):
+    path = tmp_path / "lock.json"
+    path.write_text(json.dumps({"format": 1, "messages": {"M": {"fields": {"a": 1}, "retired": []}},
+                                "renames": {}}))
+    lock = load_lock(path)
+    assert lock == {"format": LOCK_FORMAT, "messages": {"M": {"fields": {"a": 1}, "retired": []}}}
+    assert '"renames"' not in dump_lock(lock)
+
+
+def test_format_1_lock_with_renames_must_move_them(tmp_path):
+    path = tmp_path / "lock.json"
+    path.write_text(json.dumps({"format": 1, "messages": {}, "renames": {"M": {"new": "old"}}}))
+    with pytest.raises(GeneratorError, match="move it to generator/field-renames.json"):
+        load_lock(path)
+
+
+def test_unknown_lock_format_fails(tmp_path):
+    path = tmp_path / "lock.json"
+    path.write_text(json.dumps({"format": 99, "messages": {}}))
+    with pytest.raises(GeneratorError, match="unsupported lock format 99"):
+        load_lock(path)
 
 
 def test_skips_implementation_reserved_range():

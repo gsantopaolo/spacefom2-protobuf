@@ -45,7 +45,7 @@ Even with HLA 4's Federate Protocol, which defines its services in Protobuf, eac
 
 ![Field-number lifecycle: first run, attribute added, removed, renamed](../diagrams/field-numbering.gif)
 
-Protobuf identifies fields by number, so a published number must never change or be reused. The generator does not derive numbers from FOM order. A committed lock file records them: new attributes get the next free number, removed ones become `reserved`, and a rename gets a new number unless a reviewer maps it to the old one. `buf breaking` with the WIRE category checks the schema on pull requests that touch it and on every regeneration.
+Protobuf identifies fields by number, so a published number must never change or be reused. The generator does not derive numbers from FOM order. A committed lock file records them: new attributes get the next free number, removed ones become `reserved`, and a rename gets a new number unless a reviewer maps it to the old one in `generator/field-renames.json` before the bot's pull request is merged. `buf breaking` with the WIRE category checks the schema on pull requests that touch it and on every regeneration.
 
 ## What is built and what is planned
 

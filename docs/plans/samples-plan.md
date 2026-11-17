@@ -65,7 +65,7 @@ A new workflow, `generate-samples.yml`, runs on changes to `proto/` or `samples/
 2. One matrix job per language sets up the toolchain, builds, runs the reader and runs the language's tests. The tests also round-trip each of the 18 message types with every field set, finding them through protobuf reflection.
 3. On `main`, a last job opens a pull request with the regenerated files.
 
-The generate-proto bot's pull request runs other workflows only after a maintainer approves them ([GitHub changelog, 11 June 2026](https://github.blog/changelog/2026-06-11-bot-created-pull-requests-can-run-workflows-if-approved/)), so the samples are not regenerated inside it. Instead, the second workflow runs once that pull request is merged into `main` and opens a follow-up pull request for the samples. **[S5]**
+The generate-proto bot's pull request runs other workflows only after a maintainer approves them ([testing guide, step 11](../guides/testing-guide.md#c-first-bot-pull-request-the-schema)), so the samples are not regenerated inside it. Instead, the second workflow runs once that pull request is merged into `main` and opens a follow-up pull request for the samples. **[S5]**
 
 ## Versions
 
@@ -92,4 +92,4 @@ Answered by the repo owner on 2026-11-17.
 | S4 | Generated code, reader programs, tests, and the cross-language check in CI |
 | S5 | Yes, as a second workflow (owner's direction, 2026-11-17). `generate-samples` runs when `proto/` changes on `main`, which is what merging the generate-proto pull request does. It regenerates the bindings and data, builds and tests all six languages, and opens its own pull request. The pipeline is described in [`samples/README.md`](../../samples/README.md) |
 
-Versions follow protobuf's [cross-version runtime guarantee](https://protobuf.dev/support/cross-version-runtime-guarantee/): generated code is "never" paired with an older runtime, and C++ requires "an exact match between the generated code version and the runtime version". Everything is pinned to the protoc 36.2 release line: protoc 36.2, Python `protobuf` 7.36.2, `protobuf-java` 4.36.2, `Google.Protobuf` 3.36.2, libprotobuf 36.2 for C++, `protoc-gen-go` and `google.golang.org/protobuf` v1.36.12, and `@bufbuild/protoc-gen-es` with `@bufbuild/protobuf` 2.17.0.
+Versions follow protobuf's [cross-version runtime guarantee](https://protobuf.dev/support/cross-version-runtime-guarantee/): everything is pinned to the protoc 36.2 release line. The pinned runtime versions are listed in [`samples/README.md`](../../samples/README.md).
