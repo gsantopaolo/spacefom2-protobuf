@@ -1,0 +1,13 @@
+{
+  "archived_at": "20261117T133731Z",
+  "main_commit": "b9400d3a5fbbc2c5fe52a16872971de264836623",
+  "generator_versions": [
+    "0.1.0"
+  ],
+  "fom_sha256": {
+    "SISO_SpaceFOM_datatypes.xml": "f7a75794acabd984b5048558cfbce0ac0255430fe53b6fee69fd9969e9515fa5",
+    "SISO_SpaceFOM_entity.xml": "a40eed014658dee2e16e418748f90b835a12cbc2a9aa2a6a9df5ceb129eb600a",
+    "SISO_SpaceFOM_environment.xml": "a6c590f2fff0f14f72c90c81206cc5d8326650259aa22cafa725d6e9afe47f0f",
+    "SISO_SpaceFOM_management.xml": "57fe29e18b1958cb28527d9ab765fe6c5c68424b6345d53c330b37887bc9873c"
+  }
+}
