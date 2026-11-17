@@ -67,7 +67,7 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: pip
           cache-dependency-path: generator/requirements.txt
-      - run: pip install -r generator/requirements.txt
+      - run: pip install --require-hashes -r generator/requirements.txt
       - name: Tests for the pull-request decision logic
         run: python -m pytest tools -q
       - name: Fetch pinned FOM modules

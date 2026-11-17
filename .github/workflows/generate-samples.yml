@@ -78,7 +78,7 @@ jobs:
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.11"
-      - run: pip install -r samples/python/requirements.txt
+      - run: pip install --require-hashes -r samples/python/requirements.txt
       - name: Tests for the pull-request decision logic
         run: python -m pytest tools -q
       - uses: bufbuild/buf-action@37ac33d8960807670a6e9719080e885197b09cc6 # v1.7.0
@@ -150,7 +150,7 @@ jobs:
           python-version: "3.11"
       - if: matrix.language == 'python'
         run: |
-          pip install -r samples/python/requirements.txt
+          pip install --require-hashes -r samples/python/requirements.txt
           python samples/python/reader.py
           python -m pytest samples/python -v
 
