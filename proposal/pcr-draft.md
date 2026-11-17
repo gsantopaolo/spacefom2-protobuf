@@ -36,9 +36,12 @@ Form layout and field instructions from SISO-ADM-003, *SISO Balloted Products De
 | Date | _to fill on submission_ |
 | Phone | _to fill_ |
 | Email | gianpaolo.santopaolo@gmail.com |
+| Phone 2 (DSN/Cell) | _to fill_ |
 | Affiliation | Alloy Therapeutics, Inc.; contribution made in personal time |
 | Submitter willing to be lead analyst | Yes |
-| Associated analysts | — |
+| Present lead analyst | Gian Paolo Santopaolo |
+| Lead analyst email | gianpaolo.santopaolo@gmail.com |
+| Associated analysts | None |
 | Source | Spec: X · Other: X (interoperability with non-HLA tools) |
 | Type request | Change To Product: X |
 
@@ -46,8 +49,8 @@ Form layout and field instructions from SISO-ADM-003, *SISO Balloted Products De
 
 | Document name | Doc No. | Paragraph |
 |---|---|---|
-| Space Reference Federation Object Model (SpaceFOM) | SISO-STD-018-2020 | §8.7 Data Types; Appendix C.2–C.5 |
-| HLA Federate Interface Specification (Federate Protocol) | IEEE 1516.1-2025 | Federate Protocol clause |
+| Space Reference Federation Object Model (SpaceFOM) | SISO-STD-018-2020 | §8.7 Data Types; Appendix C.2 to C.5 |
+| HLA Federate Interface Specification (Federate Protocol) | IEEE 1516.1-2025 | _to fill: the clause number is not checked, because only the public 2024 draft `datatypes.proto` was read ([verification](../docs/verification.md#not-yet-verified))_ |
 
 **Additional points of contact:** Alfredo Garro (University of Calabria), Vice Chair, SpaceFOM PDG.
 
@@ -62,8 +65,8 @@ HLA 4 already uses Protocol Buffers to define the Federate Protocol services lay
 ### b. Analysis of the change
 
 - SpaceFOM 1.0 uses four basic representations: `HLAunicodeString`, `HLAinteger64Time`, `HLAinteger16LE`, `HLAfloat64LE` (§8.7.2.1), plus `HLAfixedArray` and `HLAfixedRecord` aggregates. No variant records are defined (§8.7.2.6). Each has a direct Protobuf equivalent (see the [mapping](../docs/technical-overview.md#mapping)).
-- The FOM XML carries `<units>` on simple types and `<semantics>` on types and fields, so units and meaning can be carried into the `.proto` as comments without loss.
-- Generating the schema from the FOM, rather than hand-writing it, keeps it consistent with every FOM revision, including SpaceFOM 2.0 changes such as configurable time resolution, the updated epoch and the HLA 4 `Reference` datatype.
+- The FOM XML carries `<units>` on simple types and `<semantics>` on types and fields, and the generator copies them into the `.proto` as comments. The `<semantics>` text of the simple datatypes is not copied yet.
+- A schema generated from the FOM stays consistent with each FOM revision. The generator is proven on the SpaceFOM 1.0 modules. SpaceFOM 2.0 changes, such as configurable time resolution, the updated epoch and the HLA 4 `Reference` datatype, need new generator rules, to be added as the 2.0 FOM drafts appear ([what 2.0 needs](../docs/technical-overview.md#what-spacefom-20-needs-from-the-generator)).
 - An open-source prototype validates the mapping on the SpaceFOM 1.0 modules: the generator and the generated schema are built and tested in CI, with generated code tested in six languages. The bridge federate is planned.
 
 ### c. Recommended action
@@ -80,7 +83,7 @@ _Initial view (to be completed in analysis):_ additive only. No change to existi
 
 ## Block 5. Impacts on other standards or products
 
-_Initial view:_ aligned with IEEE 1516-2025 (HLA 4), which already uses Protobuf for the Federate Protocol. No conflict identified with the SMP or FMI interoperability work. To be completed in analysis.
+_Initial view:_ consistent with IEEE 1516-2025 (HLA 4), which already uses Protobuf for the Federate Protocol. To be completed in analysis.
 
 ## Block 6. PCR action history
 
