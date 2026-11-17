@@ -1,4 +1,4 @@
-# Plan: a one-command Docker demo of the SpaceFOM → Protobuf bridge
+# Plan: a one-command Docker demo of the SpaceFOM-to-Protobuf bridge
 
 Status: **draft for review**. Nothing here is built yet. Decisions are marked **[E1]…[E6]** and collected at the end. The PDG's own preferences are asked in [Q8 of the open questions](../../proposal/open-questions.md#demo).
 
@@ -38,7 +38,7 @@ A public, one-command demo therefore needs a small SpaceFOM federate written for
 |---|---|
 | `rti` | Portico 2.1.4, built from its source release on a pinned JDK image |
 | `publisher` | A Java 1516e federate that loads the four SpaceFOM FOM modules (fetched by sha256 from `fom/SOURCE.json`). It acts as Master Federate: it publishes `ExecutionConfiguration` (moving through `EXEC_MODE_INITIALIZING` → `EXEC_MODE_RUNNING`), a root frame and an Earth-centred frame (`ReferenceFrame`), and one `DynamicalEntity` in a circular orbit, updated at a fixed rate with time-stamped updates |
-| `bridge` | A Java 1516e federate that subscribes to those classes and decodes the attributes with Portico's encoders. It builds the generated `siso.spacefom.v1` messages (Java bindings from `samples/generated/java`) and writes them to Kafka, one topic per class, keyed by object instance name |
+| `bridge` | A Java 1516e federate that subscribes to those classes and decodes the attributes with Portico's encoders. It builds the generated `siso.spacefom.v1` messages (Java bindings from `samples/generated/java`) and writes them to Kafka, one topic per class, keyed by object instance name (how the schema itself identifies the instance is [open question Q9](../../proposal/open-questions.md#schema-design)) |
 | `kafka` | `apache/kafka:4.4.0`, single-node KRaft |
 | `consumer-python` | Uses the Python bindings from `samples/generated/python` and prints each update as JSON |
 | `web` | A small page that plots the vehicle's position, fed over a WebSocket by a tiny Node service using the TypeScript bindings **[E5]** |

@@ -22,19 +22,20 @@
     <rect x="552" y="196" width="168" height="36" rx="8"/>
     <rect x="552" y="244" width="168" height="36" rx="8"/>
   </g>
-  <rect x="264" y="108" width="200" height="72" rx="8" fill="#2563eb" fill-opacity="0.12" stroke="#2563eb" stroke-width="2"/>
+  <rect x="264" y="108" width="200" height="72" rx="8" fill="#2563eb" fill-opacity="0.12" stroke="#2563eb" stroke-width="2" stroke-dasharray="6 4"/>
   <g text-anchor="middle" fill="#111827">
     <text x="116" y="84" font-weight="600">HLA federation</text>
     <text x="116" y="102" font-size="11.5" fill="#6b7280">unchanged, HLA-encoded</text>
     <text x="116" y="144">SpaceFOM federates</text>
     <text x="116" y="208">RTI (HLA 4)</text>
     <text x="116" y="296">SpaceFOM FOM modules</text>
-    <text x="364" y="132" font-weight="600">Bridge federate</text>
-    <text x="364" y="150" font-size="11.5">decodes HLA values</text>
-    <text x="364" y="166" font-size="11.5">publishes Protobuf messages</text>
+    <text x="364" y="127" font-weight="600">Bridge federate</text>
+    <text x="364" y="143" font-size="11.5">decodes HLA values</text>
+    <text x="364" y="158" font-size="11.5">publishes Protobuf messages</text>
+    <text x="364" y="173" font-size="11.5" fill="#6b7280">(planned)</text>
     <text x="364" y="252" font-weight="600">FOM to .proto generator</text>
     <text x="364" y="270" font-size="11.5" fill="#6b7280">reads the FOM XML</text>
-    <text x="364" y="286" font-size="11.5" fill="#6b7280">runs in CI, schema never drifts</text>
+    <text x="364" y="286" font-size="11.5" fill="#6b7280">regenerates the schema in CI</text>
     <text x="636" y="84" font-weight="600">Consumers outside HLA</text>
     <text x="636" y="122">Kafka, cloud pipelines</text>
     <text x="636" y="170">ROS 2 nodes</text>
