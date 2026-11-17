@@ -14,11 +14,12 @@ Everything is in one repository, [gsantopaolo/spacefom2-protobuf](https://github
 - `proto/siso/spacefom/v1/` holds the generated schema, one file per FOM module.
 - `fom/SOURCE.json` pins the FOM modules to a commit of [nasa/TrickHLA](https://github.com/nasa/TrickHLA/tree/master/FOMs/SpaceFOM). That is where the XML is distributed today; no SISO-hosted copy is used.
 - A GitHub Actions workflow regenerates the schema when the FOM or the generator changes, checks it with `protoc` and `buf`, and opens a pull request with the result.
-- In progress: `samples/`, with generated code and a small reader program in C++, Python, Java, C#, TypeScript and Go. All six decode the same data file in CI, which shows that one federate's data can be read in any of those languages. Later: the bridge federate and a Docker Compose demo.
+- `samples/` has generated code and a small reader program in C++, Python, Java, C#, TypeScript and Go. All six decode the same data file in CI, which shows that one federate's data can be read in any of those languages. A second workflow regenerates and tests them when the schema changes and opens its own pull request.
+- Planned, not built yet: the bridge federate and a Docker Compose demo.
 
 ## Options
 
-**A. One repository (current state).** Schema, generator, samples, bridge and demo live together. A schema change and the matching sample changes land in the same pull request, so they cannot drift apart. The cost is that users who want only the schema also get toolchains for six languages.
+**A. One repository (current state).** Schema, generator, samples, bridge and demo live together. Merging a schema change makes CI regenerate and test the samples in the same repository and open a pull request with the result, so the two stay in step. The cost is that users who want only the schema also get toolchains for six languages.
 
 **B. Two repositories.**
 - A *schema* repository: FOM-derived `.proto` files, generator, lock file and CI. It publishes versioned releases, such as `v1.0.0` for SpaceFOM 1.0 and a new major version for SpaceFOM 2.0.

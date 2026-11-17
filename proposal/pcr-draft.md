@@ -64,7 +64,7 @@ HLA 4 already uses Protocol Buffers to define the Federate Protocol services lay
 - SpaceFOM 1.0 uses four basic representations: `HLAunicodeString`, `HLAinteger64Time`, `HLAinteger16LE`, `HLAfloat64LE` (§8.7.2.1), plus `HLAfixedArray` and `HLAfixedRecord` aggregates. No variant records are defined (§8.7.2.6). Each has a direct Protobuf equivalent (see the [mapping](../docs/technical-overview.md#mapping)).
 - The FOM XML carries `<units>` on simple types and `<semantics>` on types and fields, so units and meaning can be carried into the `.proto` as comments without loss.
 - Generating the schema from the FOM, rather than hand-writing it, keeps it consistent with every FOM revision, including SpaceFOM 2.0 changes such as configurable time resolution, the updated epoch and the HLA 4 `Reference` datatype.
-- A prototype generator and bridge federate are being developed in the open to validate the mapping on the SpaceFOM 1.0 modules.
+- An open-source prototype validates the mapping on the SpaceFOM 1.0 modules: the generator and the generated schema are built and tested in CI, with generated code tested in six languages. The bridge federate is planned.
 
 ### c. Recommended action
 
