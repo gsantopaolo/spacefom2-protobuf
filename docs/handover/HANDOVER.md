@@ -6,6 +6,7 @@ State as of 17 November 2026. Written for the next agent or contributor picking 
 
 - [Goal](#goal)
 - [Ground rules](#ground-rules)
+- [Implementation brief](#implementation-brief)
 - [Where things are](#where-things-are)
 - [What is done](#what-is-done)
 - [What is open](#what-is-open)
@@ -30,6 +31,43 @@ These come from the repo owner and are mandatory.
 6. **SISO attribution.** Anything derived from the FOM modules (including generated `.proto` files) must carry: "Reprinted with permission from SISO Inc." (licence notice inside every FOM XML file).
 7. **Run every new or edited document through the humanizer skill** ([blader/humanizer](https://github.com/blader/humanizer), `SKILL.md` installed in `~/.claude/skills/humanizer/`) in file mode: prose only, keeping code, links, citations and facts unchanged.
 8. **Questions for the PDG vice chair are batched**, never sent piecemeal: add them to `reference-docs/questions-for-alfredo.md` (local, git-excluded, in Italian). The owner sends them all at once.
+
+## Implementation brief
+
+This section is for the agent that builds the FOM XML → `.proto` generator and its GitHub Action, as described in [`docs/plans/generator-ci-plan.md`](../plans/generator-ci-plan.md).
+
+### Before you write code
+
+1. Read this handover, the plan, [`docs/technical-overview.md`](../technical-overview.md) (mapping table) and [`docs/verification.md`](../verification.md).
+2. Check that the plan's status line says **approved** and that decisions D1 to D8 in its §9 have answers. If they don't, stop and ask the repo owner. Do not pick answers yourself.
+3. Get the FOM XML. On the owner's Mac it is in `reference-docs/standards/fom-xml-trickhla/`. Elsewhere, follow the source chosen for D1 (by default: download from nasa/TrickHLA at the pinned commit and check the sha256 of each file). Never commit `reference-docs/`.
+
+### Scope
+
+Phases 1 to 5 of the plan's §8: parser and model, mapping and emitter, inheritance and enums, stable field numbering with the lock file, validation (protoc, golden test, idempotence, buf), the workflow with history archive and PR creation, and the doc updates. The bridge federate and the Docker demo are out of scope for this task; they get their own plan later.
+
+### How to deliver
+
+- Work on branch `feat/generator`, created from `main`. Never push to `main`.
+- Commit in small steps, one plan phase at a time if possible.
+- Open one pull request to `main` when the definition of done below is met. In the PR description, list each plan decision you implemented, anything you could not verify, and anything you changed from the plan and why.
+- Do not change repository settings, secrets or visibility. If something needs a setting (for example "Allow GitHub Actions to create and approve pull requests"), write it in the PR description for the owner.
+- Questions for the owner go in the PR description or as PR comments. Questions for the PDG go in `reference-docs/questions-for-alfredo.md` (rule 8).
+
+### Definition of done
+
+- Running the generator on the SpaceFOM 1.0 FOM XML produces `.proto` files that compile with `protoc`.
+- The golden test passes: every message in [`docs/examples/reference_frame.proto`](../examples/reference_frame.proto) exists in the generated output with the same field names, numbers, types and labels.
+- Running the generator twice gives identical bytes and an unchanged lock file.
+- Every generated file carries the SISO attribution (rule 6) and records the generator version and input hashes, with no timestamps.
+- Unit tests pass locally and in CI.
+- The workflow has been run successfully on the branch in dry-run mode (no PR opened), and its log is linked in the PR.
+- README, technical overview and verification are updated for anything new (zero enum value, inheritance, lock file), and every new claim in them is cited (rule 1).
+- Every new or changed document has been through the humanizer (rule 7).
+
+### Review
+
+The repo owner will ask a Claude Code session to review the PR against the plan and these rules. Expect comments on unverified claims, field numbering, and anything that deviates from the plan.
 
 ## Where things are
 
