@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 340" role="img" aria-label="HLA stays inside the federation; Protobuf carries SpaceFOM data out" font-family="Helvetica, Arial, sans-serif" font-size="13">
+  <rect width="760" height="340" fill="#ffffff"/>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#6b7280"/></marker>
+  </defs>
+  <text x="24" y="30" font-size="15" font-weight="600" fill="#111827">HLA stays inside the federation; Protobuf carries SpaceFOM data out</text>
+  <g fill="none" stroke="#6b7280" stroke-width="1.25">
+    <path d="M208 144H264" marker-end="url(#arrow)"/>
+    <path d="M464 144H536" marker-end="url(#arrow)"/>
+    <path d="M364 228V180" marker-end="url(#arrow)"/>
+    <path d="M208 290H264" marker-end="url(#arrow)"/>
+  </g>
+  <g fill="none" stroke="#6b7280" stroke-width="1.25">
+    <rect x="24" y="60" width="184" height="190" rx="8"/>
+    <rect x="40" y="116" width="152" height="48" rx="8"/>
+    <rect x="40" y="180" width="152" height="48" rx="8"/>
+    <rect x="24" y="268" width="184" height="48" rx="8"/>
+    <rect x="264" y="228" width="200" height="72" rx="8"/>
+    <rect x="536" y="60" width="200" height="236" rx="8"/>
+    <rect x="552" y="100" width="168" height="36" rx="8"/>
+    <rect x="552" y="148" width="168" height="36" rx="8"/>
+    <rect x="552" y="196" width="168" height="36" rx="8"/>
+    <rect x="552" y="244" width="168" height="36" rx="8"/>
+  </g>
+  <rect x="264" y="108" width="200" height="72" rx="8" fill="#2563eb" fill-opacity="0.12" stroke="#2563eb" stroke-width="2"/>
+  <g text-anchor="middle" fill="#111827">
+    <text x="116" y="84" font-weight="600">HLA federation</text>
+    <text x="116" y="102" font-size="11.5" fill="#6b7280">unchanged, HLA-encoded</text>
+    <text x="116" y="144">SpaceFOM federates</text>
+    <text x="116" y="208">RTI (HLA 4)</text>
+    <text x="116" y="296">SpaceFOM FOM modules</text>
+    <text x="364" y="132" font-weight="600">Bridge federate</text>
+    <text x="364" y="150" font-size="11.5">decodes HLA values</text>
+    <text x="364" y="166" font-size="11.5">publishes Protobuf messages</text>
+    <text x="364" y="252" font-weight="600">FOM to .proto generator</text>
+    <text x="364" y="270" font-size="11.5" fill="#6b7280">reads the FOM XML</text>
+    <text x="364" y="286" font-size="11.5" fill="#6b7280">runs in CI, schema never drifts</text>
+    <text x="636" y="84" font-weight="600">Consumers outside HLA</text>
+    <text x="636" y="122">Kafka, cloud pipelines</text>
+    <text x="636" y="170">ROS 2 nodes</text>
+    <text x="636" y="218">MBSE tools</text>
+    <text x="636" y="266">Data analysis, replay</text>
+    <text x="236" y="136" font-size="11.5" fill="#6b7280">HLA</text>
+    <text x="500" y="136" font-size="11.5" fill="#6b7280">Protobuf</text>
+  </g>
+  <text x="372" y="208" font-size="11.5" fill="#6b7280">.proto schema</text>
+</svg>

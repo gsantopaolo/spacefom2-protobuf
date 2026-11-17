@@ -1,0 +1,13 @@
+# IDE
+.idea/
+.vscode/
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Generated / build output
+build/
+dist/
