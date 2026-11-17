@@ -24,7 +24,8 @@ DATATYPES = f"""
     <arrayData><name>PositionVector</name><dataType>Length</dataType><cardinality>3</cardinality>
       <encoding>HLAfixedArray</encoding><semantics>A position.</semantics></arrayData>
     <arrayData><name>InertiaMatrix</name><dataType>Inertia</dataType><cardinality>9</cardinality>
-      <encoding>HLAfixedArray</encoding></arrayData>
+      <encoding>HLAfixedArray</encoding><semantics>Matrix  semantics:
+      Ixx, Ixy first.</semantics></arrayData>
   </arrayDataTypes>
   <fixedRecordDataTypes>
     <fixedRecordData><name>State</name><encoding>HLAfixedRecord</encoding>
@@ -128,6 +129,24 @@ def test_semantics_flag(fom_dir):
     assert "semantics=off" in off
     assert "Reprinted with permission from SISO Inc." in off
     assert "// Inherited from Base." in off  # generator notes stay
+
+
+def test_matrix_semantics_go_on_each_field_that_uses_it(fom_dir):
+    entity = "siso/spacefom/v1/entity.proto"
+    on = generate(paths(fom_dir), empty_lock()).files[entity]
+    assert (
+        "  // inertia.\n"
+        "  //\n"
+        "  // InertiaMatrix: Matrix semantics: Ixx, Ixy first.\n"
+        "  //\n"
+        "  // InertiaMatrix: 3x3 as 9 elements in HLA array order; Inertia: kilogram\n"
+        "  // meter squared (kg*m^2)\n"
+        "  repeated double inertia = 3;\n"
+    ) in on
+    assert "row-wise" not in on  # the generator adds no layout claim of its own
+    off = generate(paths(fom_dir), empty_lock(), semantics=False).files[entity]
+    assert "Matrix semantics" not in off
+    assert "  // InertiaMatrix: 3x3 as 9 elements in HLA array order;" in off
 
 
 def test_interactions_flag_keeps_numbers(fom_dir):
