@@ -31,6 +31,7 @@ Federation roles, synchronization and time management stay in HLA; the schema is
 | [Open questions for the PDG](proposal/open-questions.md) | Every decision the proposal needs from the PDG, with context |
 | [Reference repository proposal](proposal/reference-repository.md) | Where the schema, generator and multi-language samples should live if the PDG adopts them: options and the decisions needed |
 | [Technical overview](docs/technical-overview.md) | HLA-to-Protobuf mapping, example `.proto`, architecture |
+| [Testing guide](docs/guides/testing-guide.md) | Step by step: create the conda environment, test the generator locally, then test the automation in the GitHub web UI |
 | [Verification](docs/verification.md) | Every technical claim, with the clause of the standard it was checked against |
 | [Generator and CI plan](docs/plans/generator-ci-plan.md) | Approved plan for the FOM XML → `.proto` generator and the GitHub Action that opens update PRs |
 | [Generated schema](proto/siso/spacefom/v1/) | The `.proto` files generated from the SpaceFOM 1.0 FOM modules, package `siso.spacefom.v1` |
@@ -67,23 +68,9 @@ message ReferenceFrame {
 
 The generator is plain Python 3.11 and needs no XML library beyond the standard one. It downloads the four SISO FOM modules from the [nasa/TrickHLA][trickhla] commit pinned in [`fom/SOURCE.json`](fom/SOURCE.json), checks their sha256, and writes `proto/`.
 
-To test it locally, run these from the repository root in a dedicated conda environment:
-
-```sh
-conda create -n spacefom2 python=3.11 -y
-conda activate spacefom2
-pip install -r generator/requirements.txt
-export PYTHONPATH=generator
-python -m spacefom_proto fetch --dest build/fom
-python -m spacefom_proto generate --fom-dir build/fom --check
-SPACEFOM_FOM_DIR=build/fom python -m pytest -q generator/tests tools
-```
-
-`fetch` prints the paths of the four FOM files under `build/fom/` and fails if a sha256 does not match. `generate --check` writes nothing; it prints "Generated files are up to date." or fails if the committed files are out of date. Drop `--check` to rewrite `proto/`. The tests should end with `42 passed`: the generator's unit, golden and idempotence tests plus the tests of the CI check scripts in `tools/`.
+**How to test it, step by step** (on your computer and on GitHub): [testing guide](docs/guides/testing-guide.md).
 
 `--no-semantics` leaves the FOM's `<semantics>` text out of the comments, and `--no-interactions` leaves out `ModeTransitionRequest`. Field numbers are kept stable by [`generator/field-ids.lock.json`](generator/field-ids.lock.json) (see [Field numbers](docs/technical-overview.md#field-numbers)).
-
-To build and test the samples in all six languages, run `sh samples/test-all.sh`; it needs the extra toolchains listed in [`samples/README.md`](samples/README.md). To test the automation on GitHub, follow [Triggering the generation in CI](#triggering-the-generation-in-ci).
 
 ### Triggering the generation in CI
 
@@ -96,31 +83,7 @@ The [`generate-proto`](.github/workflows/generate-proto.yml) workflow runs the s
 | Pull request | Regenerates and runs every check on the fresh output, but opens nothing. A PR that changes only the inputs (`fom/`, `generator/`, `buf.yaml`) passes with a stale `proto/`, because the bot regenerates it after the merge. A PR that edits `proto/` or the lock file by hand fails if they don't match what the generator produces |
 | Manual run | Same as a push to the branch you pick; tick `dry_run` to skip the pull request on `main` |
 
-Everything below is done in the GitHub web UI and needs write access to the repository.
-
-#### Running a workflow by hand
-
-The steps follow [GitHub Docs: manually running a workflow](https://docs.github.com/en/actions/how-tos/manage-workflow-runs/manually-run-a-workflow).
-
-1. Open the **Actions** tab and click **generate-proto** (or **generate-samples**) in the left sidebar.
-2. Click **Run workflow** above the list of runs and pick `main` in the **Branch** dropdown.
-3. Tick `dry_run` to get a report only. Leave it clear and the workflow opens a pull request if the output changed.
-4. Click **Run workflow** in the form.
-5. Click the run's name in the list to open its summary page ([GitHub Docs: viewing workflow run history](https://docs.github.com/en/actions/how-tos/monitor-workflows/view-workflow-run-history)). For `generate-proto` the summary says whether it was a dry run and lists any field-number changes.
-
-#### Moving to a newer FOM
-
-A FOM change reaches the samples through three pull requests:
-
-1. Open [`fom/SOURCE.json`](fom/SOURCE.json) on `main` and click the pencil icon (**Edit file**). Change `commit` to the new upstream commit and update the `sha256` of each file that changed ([GitHub Docs: editing files](https://docs.github.com/en/repositories/working-with-files/managing-files/editing-files)).
-2. Click **Commit changes...**, choose to create a new branch for the commit, click **Propose changes**, then **Create pull request**. You don't need to regenerate `proto/`: CI regenerates it, runs every check on the result, and the `generate-proto` run summary says the output "will be regenerated by the bot after merge".
-3. When the checks pass, click **Merge pull request**, then **Confirm merge** ([GitHub Docs: merging a pull request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/incorporating-changes-from-a-pull-request/merging-a-pull-request)). `generate-proto` then runs on `main`, copies the previous tree into `history/`, and opens the pull request "Regenerate SpaceFOM .proto files" from `generator/proto-update`.
-4. Find that pull request in the **Pull requests** tab. Its validation already ran inside the generating run, but its own checks wait as "awaiting approval" because a bot opened it ([GitHub changelog, 11 June 2026](https://github.blog/changelog/2026-06-11-bot-created-pull-requests-can-run-workflows-if-approved/)). Review **Files changed**, click **Approve workflows to run** ([GitHub Docs: approving workflow runs](https://docs.github.com/en/actions/how-tos/manage-workflow-runs/approve-runs-from-forks)), wait for the checks to pass, then click **Merge pull request** and **Confirm merge**.
-5. That merge changes `proto/`, which starts [`generate-samples`](.github/workflows/generate-samples.yml) on `main`. It regenerates the code for six languages and the sample data, builds and tests every language, and opens "Regenerate sample bindings and data" from `generator/samples-update`. Approve and merge it as in step 4.
-
-The last merge starts `generate-samples` once more. It is done when that run's summary says "Generated sample code and data are unchanged." and no new pull request appears, as in [this run](https://github.com/gsantopaolo/spacefom2-protobuf/actions/runs/44095824846) from the end-to-end test.
-
-You can also commit the regenerated output in the same pull request as the FOM change, but then it has to match the generator exactly, or the check fails. [`samples/README.md`](samples/README.md) shows the same flow as a diagram.
+To run a workflow by hand, or to move to a newer FOM through the bot's pull requests, follow the [testing guide](docs/guides/testing-guide.md), Part 2 and Part 3. Pull requests opened by the bot wait for someone with write access to click "Approve workflows to run" before their checks run ([GitHub changelog, 11 June 2026](https://github.blog/changelog/2026-06-11-bot-created-pull-requests-can-run-workflows-if-approved/)).
 
 ## Repository layout
 
