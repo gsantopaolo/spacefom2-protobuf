@@ -1,6 +1,6 @@
 # Plan: multi-language samples generated from the SpaceFOM `.proto`
 
-Status: **draft for review**. Decisions are marked **[S1]…[S5]** and collected at the end.
+Status: **approved** by the repo owner on 2026-11-17. Decisions **[S1]…[S5]** are answered at the end.
 
 ## Goal
 
@@ -33,18 +33,17 @@ All languages except Go and TypeScript generate with protoc's built-in generator
 
 ```
 samples/
-  README.md                 what each sample shows, how to run it
+  README.md                 the two-workflow pipeline, what the code does, how to run it
   buf.gen.yaml              one generation config for every language
-  data/
-    entities.binpb          shared wire fixture: ReferenceFrame, DynamicalEntity, ExecutionConfiguration
-    entities.json           the same values in protobuf JSON, for humans
-  python/   writer.py, reader.py
-  cpp/      reader.cpp, CMakeLists.txt
-  java/     Reader.java, build file
-  csharp/   Reader.cs, .csproj
-  typescript/ reader.ts, package.json
-  go/       reader.go, go.mod
-  generated/<language>/     generated code (if committed, [S2])
+  test-all.sh               regenerate, then build and test every language locally
+  data/                     shared data: one .binpb (and .json) per message
+  python/                   writer.py, reader.py, test_samples.py (pytest)
+  go/                       main.go (reader), main_test.go; go.mod is in samples/
+  typescript/               reader.ts, reader.test.ts (node:test); package.json is in samples/
+  java/                     Maven project: Reader.java, SamplesTest.java (JUnit)
+  csharp/                   Reader/ (console app), Tests/ (xUnit)
+  cpp/                      CMake project: checks.cpp, reader.cpp, samples_test.cpp (GoogleTest)
+  generated/<language>/     generated code, committed ([S2])
 ```
 
 `buf.gen.yaml` uses buf managed mode ([buf.gen.yaml v2](https://buf.build/docs/configuration/v2/buf-gen-yaml/)) to set `java_package`, `go_package` and similar options at generation time. The `.proto` files themselves stay free of language options. **[S3]**
@@ -59,17 +58,17 @@ Byte-for-byte equality across languages is not checked. Protobuf serialization i
 
 ## CI
 
-A new workflow, `samples.yml`, runs on changes to `proto/` or `samples/`:
+A new workflow, `generate-samples.yml`, runs on changes to `proto/` or `samples/`:
 
 1. Regenerate with `buf generate` and fail if `samples/generated/` changed ([S2]).
-2. One matrix job per language: set up the toolchain, build, and run the reader against the committed fixture.
+2. One matrix job per language: set up the toolchain, build, run the reader, and run the language's tests. The tests also round-trip every one of the 18 message types with all fields set, found through protobuf reflection.
 3. The Python job also regenerates the fixture and checks it is unchanged.
 
-Because the generate-proto bot opens a PR when the schema changes and that PR does not trigger other workflows, the generate-proto job also needs to run `buf generate` for the samples. Otherwise the generated sample code goes stale in the bot PR. **[S5]**
+The generate-proto bot's pull request does not trigger other workflows, so the samples cannot be checked inside it. Instead, the second workflow runs once that pull request is merged into `main` and opens a follow-up pull request for the samples. **[S5]**
 
 ## Versions
 
-Pin every plugin and runtime: protoc, `protoc-gen-go`, `protoc-gen-es` and the matching runtime libraries (`protobuf` for Python, `com.google.protobuf:protobuf-java`, `Google.Protobuf`, `@bufbuild/protobuf`, `google.golang.org/protobuf`). Generated code and runtime library versions have to be compatible. I have not yet read the exact rule in protobuf's [cross-version runtime guarantee](https://protobuf.dev/support/cross-version-runtime-guarantee/); I'll check it in phase 1 before choosing pins.
+Pin every plugin and runtime: protoc, `protoc-gen-go`, `protoc-gen-es` and the matching runtime libraries (`protobuf` for Python, `com.google.protobuf:protobuf-java`, `Google.Protobuf`, `@bufbuild/protobuf`, `google.golang.org/protobuf`). The exact versions are listed under Decisions.
 
 ## Phases
 
@@ -82,8 +81,14 @@ Pin every plugin and runtime: protoc, `protoc-gen-go`, `protoc-gen-es` and the m
 
 ## Decisions
 
-- **S1** Languages: the six recommended (C++, Python, Java, C#, TypeScript, Go), or also Rust as preview?
-- **S2** Commit the generated code under `samples/generated/` so vendors can browse it, or generate it only in CI and locally?
-- **S3** Package names for languages that need them: Java `io.github.gsantopaolo.spacefom.v1`, Go module `github.com/gsantopaolo/spacefom2-protobuf/samples/generated/go`, C# namespace `Siso.Spacefom.V1` (protoc's default from the package)? A `org.siso…` Java package would suggest SISO publishes it, so I'd avoid it.
-- **S4** Depth: generated code only, or generated code plus the cross-language reader programs and the CI interop test described above?
-- **S5** Should the generate-proto workflow also regenerate the sample code, so its bot PR stays consistent?
+Answered by the repo owner on 2026-11-17.
+
+| # | Decision |
+|---|---|
+| S1 | The six recommended languages: C++, Python, Java, C#, TypeScript, Go. No Rust for now |
+| S2 | Commit the generated code under `samples/generated/`; CI fails if it is stale |
+| S3 | Java package `org.siso.spacefom.v1`. Go import paths must be real repository paths, so Go uses `github.com/gsantopaolo/spacefom2-protobuf/samples/generated/go/...`. C# keeps protoc's default namespace `Siso.Spacefom.V1`. The samples README states that these names are proposals, not names published by SISO |
+| S4 | Generated code, plus the reader programs and the CI interop test |
+| S5 | Yes, as a second workflow (owner's direction, 2026-11-17). `generate-samples` runs when `proto/` changes on `main`, which is what merging the generate-proto pull request does. It regenerates the bindings and data, builds and tests all six languages, and opens its own pull request. The pipeline is described in [`samples/README.md`](../../samples/README.md) |
+
+Versions follow protobuf's [cross-version runtime guarantee](https://protobuf.dev/support/cross-version-runtime-guarantee/): generated code is "never" paired with an older runtime, and C++ requires "an exact match between the generated code version and the runtime version". Everything is pinned to the protoc 36.2 release line: protoc 36.2, Python `protobuf` 7.36.2, `protobuf-java` 4.36.2, `Google.Protobuf` 3.36.2, libprotobuf 36.2 for C++, `protoc-gen-go` and `google.golang.org/protobuf` v1.36.12, and `@bufbuild/protoc-gen-es` with `@bufbuild/protobuf` 2.17.0.

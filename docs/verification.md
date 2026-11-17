@@ -31,6 +31,13 @@ Every technical statement in the proposal was checked against the primary source
 | The "Run workflow" button for `workflow_dispatch` appears only when the workflow file is on the default branch | [GitHub Docs, events that trigger workflows][gh-events] |
 | Events triggered with `GITHUB_TOKEN` do not start new workflow runs (except `workflow_dispatch` and `repository_dispatch`), so the generator job validates before it opens the PR | [GitHub Docs, triggering a workflow][gh-trigger] |
 | Action inputs used: `create-pull-request` v8.1.3 (`branch`, `delete-branch`, `add-paths`, `body-path`, `labels`), `buf-action` v1.7.0 (`setup_only`), `setup-python` v7.1.0 (`cache`, `cache-dependency-path`) | `action.yml` at each tag: [create-pull-request][cpr-action], [buf-action][buf-action], [setup-python][sp-action] |
+| Protobuf generated code must "never" run on a runtime older than the protoc that generated it; C++ and Rust require "an exact match between the generated code version and the runtime version" | [Protobuf cross-version runtime guarantee][xver] |
+| Languages built into `protoc`: C++, C#, Java, Kotlin, Objective-C, PHP, Python, Ruby; Go and Dart use Google-supported plugins | [Protobuf overview][pb-overview] |
+| protobuf-es generates TypeScript/JavaScript; Google's protobuf-javascript has "minimal support" | [protobuf-es][pb-es]; [protobuf-javascript][pb-js] |
+| The sample languages' consumers (TrickHLA and Trick in C++ and Python, Java SpaceFOM tools, Unity in C#, CesiumJS) | Sources listed in [`docs/plans/samples-plan.md`](plans/samples-plan.md#which-languages-and-why) |
+| buf managed mode sets `java_package` and `go_package` at generation time; `protoc_builtin` and `local` plugin keys | [buf.gen.yaml v2 reference][buf-gen] |
+| C# generated enum values drop the enum-name prefix (`MTR_MODE_UNSPECIFIED` → `MTRMode.Unspecified`) | Generated code: `samples/generated/csharp/Management.cs`, protoc 36.2 |
+| Node runs TypeScript by stripping types and rejects `enum` ("TypeScript enum is not supported in strip-only mode"), so TypeScript is generated as JavaScript plus `.d.ts` | Node 26.13.1 error output, local run on 2026-11-17 |
 
 ## Not yet verified
 
@@ -83,3 +90,8 @@ FOM XML: SpaceFOM 1.0 modules as distributed in [nasa/TrickHLA][trickhla]; links
 [cpr-action]: https://github.com/peter-evans/create-pull-request/blob/v8.1.3/action.yml
 [buf-action]: https://github.com/bufbuild/buf-action/blob/v1.7.0/action.yml
 [sp-action]: https://github.com/actions/setup-python/blob/v7.1.0/action.yml
+[xver]: https://protobuf.dev/support/cross-version-runtime-guarantee/
+[pb-overview]: https://protobuf.dev/overview/
+[pb-es]: https://github.com/bufbuild/protobuf-es
+[pb-js]: https://github.com/protocolbuffers/protobuf-javascript
+[buf-gen]: https://buf.build/docs/configuration/v2/buf-gen-yaml/
