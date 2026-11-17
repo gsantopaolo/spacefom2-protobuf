@@ -8,8 +8,9 @@ SISO SpaceFOM datatypes from the FOM modules, as a bridge (not a replacement) fo
 | Path | Contents |
 |---|---|
 | `proposal/` | The proposal for the SpaceFOM 2.0 PDG and its architecture diagram |
-| `reference-docs/` | Papers, the conversation handoff and the original voice message |
-| `reference-docs/alfredo-message/transcribe.py` | Italian speech-to-text with mlx-whisper (Apple Silicon) |
+| `proposal/examples/` | Example `.proto` output, verified against SISO-STD-018-2020 |
+
+`reference-docs/` (standards, papers, private notes) is kept locally and excluded from git.
 
 ## Planned POC
 
