@@ -5,9 +5,9 @@
 **A Protocol Buffers schema for the SISO SpaceFOM datatypes, generated from the FOM modules,<br>so cloud, streaming, robotics and MBSE tools can read space-simulation data without speaking HLA.**
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-![Status](https://img.shields.io/badge/status-proposal-orange.svg)
-![Target](https://img.shields.io/badge/target-SpaceFOM%202.0-6f42c1.svg)
-![Base](https://img.shields.io/badge/based%20on-SISO--STD--018--2020-555.svg)
+[![Status](https://img.shields.io/badge/status-proposal-orange.svg)](proposal/pitch.md)
+[![Target](https://img.shields.io/badge/target-SpaceFOM%202.0-6f42c1.svg)](https://ntrs.nasa.gov/citations/20260008222)
+[![Base](https://img.shields.io/badge/based%20on-SISO--STD--018--2020-555.svg)](https://cdn.ymaws.com/www.sisostandards.org/resource/resmgr/standards_products/siso-std-018-2020_srfom.pdf)
 
 <img src="docs/images/bridge-architecture.svg" alt="HLA stays inside the federation; Protobuf carries SpaceFOM data out" width="760">
 
