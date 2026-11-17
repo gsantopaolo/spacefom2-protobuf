@@ -1,6 +1,6 @@
 # Plan: FOM XML → `.proto` generator with CI
 
-Status: **approved** by the repo owner on 2026-11-17. Decisions **[D1]…[D8]** are answered in §9. Implementation is on branch `feat/generator`.
+Status: **approved** by the repo owner on 2026-11-17. Decisions **[D1]…[D8]** are answered in §9. Built in PR [#1](https://github.com/gsantopaolo/spacefom2-protobuf/pull/1); later changes are noted in §6.
 
 Bracketed numbers like [S3] point to the Sources list at the end. Facts about the FOM come from the five XML files in `reference-docs/standards/fom-xml-trickhla/`. I checked those files byte for byte against `nasa/TrickHLA` `master` on 2026-11-17 and they are identical.
 
@@ -23,7 +23,7 @@ Bracketed numbers like [S3] point to the Sources list at the end. Facts about th
 |---|---|
 | `SISO_SpaceFOM_datatypes.xml` | `<time>` (`HLAinteger64Time`, "Microseconds since the beginning of the federation execution"). Also 20 `simpleData` (all `HLAfloat64LE`, each with `<units>` such as `meter (m)` or `radian per second (r/s)`), 11 `arrayData` (cardinality 3 or 9) and 4 `fixedRecordData` |
 | `SISO_SpaceFOM_environment.xml` | Object class `ReferenceFrame` (`name`, `parent_name`, `state`) |
-| `SISO_SpaceFOM_entity.xml` | `PhysicalEntity` and its **nested subclass** `DynamicalEntity`, plus `PhysicalInterface` |
+| `SISO_SpaceFOM_entity.xml` | `PhysicalEntity` and its nested subclass `DynamicalEntity`, plus `PhysicalInterface` |
 | `SISO_SpaceFOM_management.xml` | 2 `enumeratedData` (`ExecutionMode`, `MTRMode`, both `HLAinteger16LE`), object class `ExecutionConfiguration` and interaction `ModeTransitionRequest` |
 | `SISO_SpaceFOM_switches.xml` | RTI switches only. Ignored |
 
@@ -93,7 +93,7 @@ The strategy is a committed lock file, `generator/field-ids.lock.json`:
 1. **Unit tests** (pytest) for parsing and mapping, using small fixture XMLs.
 2. **Compile:** run `protoc` over `proto/` with `--descriptor_set_out`. I checked the flags in the local `protoc 36.2 --help`. For CI, use `python -m grpc_tools.protoc` from `grpcio-tools` [S15] so there is no separate protoc install. Alternatively, download a pinned protoc release [S16].
 3. **Golden test against `docs/examples/reference_frame.proto`:**
-   - The comparison has to be **structural**, because a text diff would fail on comments: the example's comments are hand-written ("empty for the root frame", `rad/s`), while the FOM says `radian per second (r/s)`.
+   - The comparison has to be structural, because a text diff would fail on comments: the example's comments are hand-written ("empty for the root frame", `rad/s`), while the FOM says `radian per second (r/s)`.
    - Compile both files to descriptor sets without `--include_source_info`, which strips comments (`protoc --help`). Then assert that every message in the example exists in the generated output with identical field names, numbers, types and labels.
    - The example compiles with `protoc` today (checked locally).
 4. **Idempotence check:** regenerate a second time, and require identical bytes and no change to the lock file.
@@ -102,6 +102,8 @@ The strategy is a committed lock file, `generator/field-ids.lock.json`:
    - Install buf via `bufbuild/buf-action@v1` with `setup_only: true` [S6][S7]. No BSR token is needed when nothing is pushed: the token is only "required for push and label-archive steps" [S7].
 
 ## 6. GitHub Action: `.github/workflows/generate-proto.yml`
+
+Changes after the plan was approved, all on 2026-11-17: the `push` trigger runs on every branch, as a dry run off `main`, and also watches `buf.yaml` and `tools/generated_output_check.py`; PR [#20](https://github.com/gsantopaolo/spacefom2-protobuf/pull/20) changed the pull-request check (below); PR [#25](https://github.com/gsantopaolo/spacefom2-protobuf/pull/25) pins every job to the `ubuntu-26.04` runner image. [`generate-proto.yml`](../../.github/workflows/generate-proto.yml) is the built version.
 
 **Triggers (proposed):**
 - `workflow_dispatch`, for on-demand runs. It supports inputs [S3], for example `dry_run`.
@@ -132,13 +134,13 @@ The strategy is a committed lock file, `generator/field-ids.lock.json`:
 - Every action is pinned to a full commit SHA, with the release tag in a comment ([#3](https://github.com/gsantopaolo/spacefom2-protobuf/issues/3)).
 - The repo setting **Settings → Actions → General → Workflow permissions → "Allow GitHub Actions to create and approve pull requests"** must be enabled. It is off by default for personal-account repos [S8].
 - Add `concurrency: { group: generate-proto, cancel-in-progress: false }` [S3] so two runs never race on the PR branch.
-- **[D8]** If you want CI checks to run *on* the bot PR, use a GitHub App token or a fine-grained PAT (`contents` and `pull-requests` write) instead of `GITHUB_TOKEN` [S1]. Otherwise, step 6 above is the only gate.
+- **[D8]** If you want CI checks to run *on* the bot PR, use a GitHub App token or a fine-grained PAT (`contents` and `pull-requests` write) instead of `GITHUB_TOKEN` [S1]. Otherwise, step 6 above is the only gate. (Since June 2026 the bot PR's own checks also run, once someone approves them; see step 6.)
 
 **History-folder rules:**
 - Archive only when the generated output differs.
 - Archive the **previous** `proto/` tree as it was on `main`, never the new one.
 - Archived folders are immutable: nothing is edited or deleted automatically.
-- They are excluded from buf lint and breaking (`buf.yaml` excludes `history/`) and from the golden test.
+- They are excluded from buf lint and breaking (`buf.yaml` makes only `proto/` a module) and from the golden test.
 - Git history already preserves every version, so `history/` is a convenience for readers browsing on GitHub. A lighter alternative is git tags plus release notes.
 
 ## 7. Getting the FOM XML into the repo, and the license question
@@ -148,7 +150,7 @@ The strategy is a committed lock file, `generator/field-ids.lock.json`:
 - **The SISO notice inside every FOM file.** The files carry "Copyright © 2020 by the Simulation Interoperability Standards Organization, Inc. All rights reserved", with two grants:
   - *Schema and API:* "a general, royalty-free license to copy, distribute, display, and make derivative works from this material, for all purposes", provided the attribution "Reprinted with permission from SISO Inc." is included.
   - *Documentation:* the same grant, but **for noncommercial purposes only**.
-- **The TrickHLA repository** is under the **NASA Open Source Agreement 1.3** [S18]. GitHub's API reports its license as `NOASSERTION`. NOSA §3A requires redistribution "under this Agreement" with a copy of it included, §3B requires a NASA copyright notice, and §3C requires a change log for modifications. It is unclear whether NOSA governs the SISO-copyrighted FOM files at all, or only NASA's code.
+- The TrickHLA repository is under the NASA Open Source Agreement 1.3 [S18]. GitHub's API reports its license as `NOASSERTION`. NOSA §3A requires redistribution "under this Agreement" with a copy of it included, §3B requires a NASA copyright notice, and §3C requires a change log for modifications. It is unclear whether NOSA governs the SISO-copyrighted FOM files at all, or only NASA's code.
 - **Open points:**
   - (a) Is `<semantics>` text "Schema" or "Documentation" under SISO's terms? Our generated `.proto` copies it verbatim into comments.
   - (b) Can generated files containing that text sit under this repo's MIT license?
@@ -213,5 +215,5 @@ Fetched or checked on 2026-11-17.
 
 **Unverified:**
 - Whether NOSA 1.3 or SISO's notice governs redistribution of the FOM files (legal question).
-- Whether buf `lint` `except`/`ignore` configuration exists as described; I did not fetch the buf.yaml config reference.
+- Whether buf `lint` `except`/`ignore` configuration exists as described; I did not fetch the buf.yaml config reference. (Since checked: `lint.except` is in the [buf.yaml v2 reference](https://buf.build/docs/configuration/v2/buf-yaml/), see [verification](../verification.md).)
 - Exact wording of `buf breaking` behaviour on `reserved` additions.
