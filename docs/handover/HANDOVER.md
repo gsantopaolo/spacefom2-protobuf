@@ -72,7 +72,7 @@ Repository: `git@github.com:gsantopaolo/spacefom2-protobuf.git`, currently **pri
 
 ## How the automation works
 
-Four workflows run in GitHub Actions. All actions are pinned to commit SHAs, jobs are read-only, and only a `main`-only job can write.
+Four workflows run in GitHub Actions on the pinned `ubuntu-26.04` runner image. All actions are pinned to commit SHAs, jobs are read-only, and only a `main`-only job can write.
 
 | Workflow | Runs on | What it does |
 |---|---|---|
@@ -108,7 +108,6 @@ This whole path was tested end to end on 17 November 2026 with a generator versi
 |---|---|---|
 | Docker demo plan: answer E1–E6 | Owner | [`docs/plans/docker-demo-plan.md`](../plans/docker-demo-plan.md). Nothing is built until it is marked approved |
 | Bridge federate and Docker demo | Implementation session, after approval | Then link the prototype in the pitch's Implementation status |
-| [#24](https://github.com/gsantopaolo/spacefom2-protobuf/issues/24): pin the runner image instead of `ubuntu-latest` | Implementation session | |
 | Make the repo public, or add the vice chair as collaborator | Owner | The pitch and the message link to it |
 | Send the vice chair the pitch, the briefing and the open questions | Owner | Draft message in `reference-docs/` |
 | Optional: dark-mode version of the diagrams | Either session | They have a white background |
