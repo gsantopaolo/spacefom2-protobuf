@@ -43,10 +43,11 @@ env:
   BUF_SHA256: fad1e38d6909bbb583a4da81d8c02a01046e2cd663bde7e337dd24277393764b
 
 jobs:
-  # Every event: regenerate, then validate the fresh output. All validation runs
-  # here, because a PR opened with GITHUB_TOKEN does not trigger other workflows
-  # (plan §6, step 6). Read-only: dry runs and pull requests never get write
-  # permissions (#4).
+  # Every event: regenerate, then validate the fresh output, so the run that
+  # opens the bot PR has already checked it. The bot PR's own pull_request runs
+  # start only after a maintainer approves them (GitHub changelog, 2026-06-11:
+  # https://github.blog/changelog/2026-06-11-bot-created-pull-requests-can-run-workflows-if-approved/).
+  # Read-only: dry runs and pull requests never get write permissions (#4).
   #
   # On a pull request, the committed proto/ may be stale when only the inputs
   # changed; the bot regenerates it after the merge. Hand-edited output that
