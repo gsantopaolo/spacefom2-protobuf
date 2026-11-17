@@ -45,7 +45,7 @@ jobs:
   # changed; the bot regenerates it after the merge. Hand-edited output that
   # does not match the generator still fails (tools/generated_output_check.py).
   generate:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     outputs:
       changed: ${{ steps.diff.outputs.changed }}
     env:
@@ -146,7 +146,7 @@ jobs:
       github.event_name != 'pull_request' &&
       github.ref == 'refs/heads/main' &&
       inputs.dry_run != true
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       contents: write
       pull-requests: write

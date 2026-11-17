@@ -1,15 +1,17 @@
 # Lint every workflow with actionlint (which also runs shellcheck on `run:`
-# steps; shellcheck is preinstalled on ubuntu-latest). Added with #19.
+# steps; shellcheck is preinstalled on the ubuntu-26.04 image). Added with #19.
 name: actionlint
 
 on:
   pull_request:
     paths:
       - .github/workflows/**
+      - .github/actionlint.yaml
   push:
     branches: [main]
     paths:
       - .github/workflows/**
+      - .github/actionlint.yaml
 
 permissions:
   contents: read
@@ -22,7 +24,7 @@ env:
 
 jobs:
   actionlint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Install actionlint ${{ env.ACTIONLINT_VERSION }}

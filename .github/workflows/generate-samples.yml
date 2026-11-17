@@ -42,7 +42,7 @@ jobs:
   # output that does not match the generator still fails
   # (tools/generated_output_check.py).
   generate:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     outputs:
       changed: ${{ steps.diff.outputs.changed }}
     steps:
@@ -121,7 +121,7 @@ jobs:
   # Build and test every language against the freshly generated code.
   test:
     needs: generate
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     strategy:
       fail-fast: false
       matrix:
@@ -213,7 +213,7 @@ jobs:
       github.event_name != 'pull_request' &&
       github.ref == 'refs/heads/main' &&
       inputs.dry_run != true
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       contents: write
       pull-requests: write
