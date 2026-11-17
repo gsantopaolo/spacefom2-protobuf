@@ -4,7 +4,7 @@
 
 ## Problem
 
-SpaceFOM data can only be consumed by software that speaks HLA. Reference frames, space-time coordinate states and entities travel as HLA-encoded records (`HLAfloat64LE` fields in `HLAfixedRecord`s, SISO-STD-018-2020 §8.7). A cloud pipeline, a Kafka stream, a ROS 2 node or an MBSE/data-analysis tool that just wants to read a vehicle's state must hand-write decoders for every type, with no shared, versioned schema. HLA 4 already defines its Federate Protocol services layer in Protobuf (SISO SIW 2026-028 §2.1), yet attribute values still travel inside those messages as opaque `bytes` (IEEE 1516.1 Federate Protocol `AttributeHandleValue`): the SpaceFOM data itself has no schema outside HLA.
+SpaceFOM data can only be consumed by software that speaks HLA: reference frames, states and entities travel as HLA-encoded records (SISO-STD-018-2020 §8.7). A cloud pipeline, Kafka stream, ROS 2 node or MBSE/data-analysis tool that just wants a vehicle's state must hand-write decoders for every type, with no shared, versioned schema. HLA 4 defines its Federate Protocol services in Protobuf (SISO SIW 2026-028 §2.1), yet attribute values still travel inside as opaque `bytes` (IEEE 1516.1 `AttributeHandleValue`).
 
 ## Hypothesis and solution
 
@@ -13,6 +13,8 @@ The SpaceFOM datatypes map cleanly onto Protocol Buffers: SpaceFOM 1.0 uses only
 - a deterministic **FOM-to-proto mapping**, as an informative annex;
 - a **reference generator**, run in CI, so the schema never drifts from the FOM (and follows 2.0 changes such as configurable time resolution);
 - a **reference bridge federate** that republishes HLA updates as Protobuf on Kafka or gRPC.
+
+<p align="center"><img src="../docs/images/bridge-architecture.svg" alt="HLA stays inside the federation; Protobuf carries SpaceFOM data out" width="640"></p>
 
 HLA is not replaced: roles, synchronization and time management stay in HLA, which remains the source of truth inside the federation.
 
