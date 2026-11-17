@@ -104,6 +104,7 @@ The pull request is opened with the repository's `GITHUB_TOKEN`, so workflows do
 
 ```
 proposal/    one-page pitch and draft PCR
+tools/       render_pdf.py: turns a Markdown doc into HTML, PDF and Word (pandoc, Chrome, librsvg)
 docs/        technical overview, verification, plans, diagrams, example .proto
 fom/         SOURCE.json: pinned upstream commit and sha256 of each FOM module
 generator/   the FOM XML -> .proto generator, its tests and the field-number lock file

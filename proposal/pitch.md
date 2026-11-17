@@ -30,9 +30,9 @@ Roles, synchronization and time management stay in HLA, which remains the source
 
 Open-source work at **[github.com/gsantopaolo/spacefom2-protobuf](https://github.com/gsantopaolo/spacefom2-protobuf)**:
 
-- [verified example schema](https://github.com/gsantopaolo/spacefom2-protobuf/blob/main/docs/examples/reference_frame.proto) for `ReferenceFrame`, checked field by field against SISO-STD-018-2020 and compiling with `protoc`;
-- [generator and CI plan](https://github.com/gsantopaolo/spacefom2-protobuf/blob/main/docs/plans/generator-ci-plan.md) (FOM XML → `.proto`, regenerated automatically on FOM changes);
-- working prototype (generator, bridge federate, Docker demo): in progress, to be linked here.
+- built: a [generator](https://github.com/gsantopaolo/spacefom2-protobuf/tree/main/generator) that turns the SpaceFOM 1.0 FOM XML into the [`siso.spacefom.v1` schema](https://github.com/gsantopaolo/spacefom2-protobuf/tree/main/proto/siso/spacefom/v1), with stable field numbers and a CI workflow that regenerates it and opens a pull request when the FOM changes;
+- built: [samples](https://github.com/gsantopaolo/spacefom2-protobuf/tree/main/samples) in C++, Python, Java, C#, TypeScript and Go that decode the same data, tested in CI;
+- planned: the bridge federate and a one-command Docker demo of a small SpaceFOM federation ([technical briefing](https://github.com/gsantopaolo/spacefom2-protobuf/blob/main/docs/hearing/technical-briefing.md)).
 
 ## Who proposes it
 
