@@ -53,7 +53,7 @@ Two Claude Code sessions work on this repository, both pushing as the `gsantopao
 | Path | Contents |
 |---|---|
 | [`proposal/pitch.md`](../../proposal/pitch.md), [`.pdf`](../../proposal/pitch.pdf), [`.docx`](../../proposal/pitch.docx) | One-page pitch in the format the vice chair asked for. The PDF and Word files are rendered from the Markdown with `tools/render_pdf.py`; the `pitch-rendered` workflow fails a PR that changes `pitch.md` without both of them |
-| [`proposal/open-questions.md`](../../proposal/open-questions.md) | Q1–Q8 for the PDG |
+| [`proposal/open-questions.md`](../../proposal/open-questions.md) | Q1 to Q11 for the PDG |
 | [`proposal/pcr-draft.md`](../../proposal/pcr-draft.md) | Proposal on the SISO PCR form (SISO-ADM-003 Appendix A) |
 | [`proposal/reference-repository.md`](../../proposal/reference-repository.md) | Where the schema, generator and samples should live if the PDG adopts them |
 | [`docs/hearing/technical-briefing.md`](../hearing/technical-briefing.md) | Briefing for the PDG hearing, with draw.io diagrams in [`docs/diagrams/`](../diagrams/) (sources and GIFs; `export.sh` regenerates them) |
