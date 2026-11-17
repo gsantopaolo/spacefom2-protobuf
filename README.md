@@ -29,7 +29,8 @@ Federation roles, synchronization and time management stay in HLA; the schema is
 | [Draft PCR](proposal/pcr-draft.md) | The proposal on the SISO Problem/Change Request form (SISO-ADM-003, Appendix A) |
 | [Technical overview](docs/technical-overview.md) | HLA-to-Protobuf mapping, example `.proto`, architecture, open questions |
 | [Verification](docs/verification.md) | Every technical claim, with the clause of the standard it was checked against |
-| [Generator and CI plan](docs/plans/generator-ci-plan.md) | Draft plan for the FOM XML → `.proto` generator and the GitHub Action that opens update PRs |
+| [Generator and CI plan](docs/plans/generator-ci-plan.md) | Approved plan for the FOM XML → `.proto` generator and the GitHub Action that opens update PRs |
+| [Generated schema](proto/siso/spacefom/v1/) | The `.proto` files generated from the SpaceFOM 1.0 FOM modules, package `siso.spacefom.v1` |
 
 ## Example
 
@@ -52,21 +53,43 @@ message ReferenceFrame {
 ## Roadmap
 
 - [x] Proposal, draft PCR and verified example schema
-- [ ] FOM XML → `.proto` generator, with CI
+- [x] FOM XML → `.proto` generator, with CI
 - [ ] Bridge federate: HLA updates → Protobuf → Kafka / gRPC
 - [ ] Docker Compose demo: sample federation, bridge and non-HLA consumers
 - [ ] Technical documentation and diagrams for the PDG hearing
 
+## Generating the schema
+
+The generator is plain Python 3.11 and needs no XML library beyond the standard one. It downloads the four SISO FOM modules from the [nasa/TrickHLA][trickhla] commit pinned in [`fom/SOURCE.json`](fom/SOURCE.json), checks their sha256, and writes `proto/`:
+
+```sh
+pip install -r generator/requirements.txt
+export PYTHONPATH=generator
+python -m spacefom_proto fetch --dest build/fom
+python -m spacefom_proto generate --fom-dir build/fom
+python -m pytest generator/tests
+```
+
+`generate --check` writes nothing and fails if the committed files are out of date. `--no-semantics` leaves the FOM's `<semantics>` text out of the comments, and `--no-interactions` leaves out `ModeTransitionRequest`. Field numbers are kept stable by [`generator/field-ids.lock.json`](generator/field-ids.lock.json) (see [Field numbers](docs/technical-overview.md#field-numbers)).
+
+The [`generate-proto`](.github/workflows/generate-proto.yml) workflow runs the same steps in CI. On a pull request it fails if `proto/` is stale. On `main` it regenerates, runs `buf lint` and `buf breaking`, copies the previous tree into `history/`, and opens a pull request when the output changes.
+
 ## Repository layout
 
 ```
-proposal/   one-page pitch and draft PCR
-docs/       technical overview, verification, diagrams, example .proto
+proposal/    one-page pitch and draft PCR
+docs/        technical overview, verification, plans, diagrams, example .proto
+fom/         SOURCE.json: pinned upstream commit and sha256 of each FOM module
+generator/   the FOM XML -> .proto generator, its tests and the field-number lock file
+proto/       generated .proto files (do not edit by hand)
+history/     earlier generated trees, added by CI when the output changes
 ```
+
+[trickhla]: https://github.com/nasa/TrickHLA/tree/master/FOMs/SpaceFOM
 
 ## Disclaimer
 
-Independent proposal by [Gian Paolo Santopaolo](https://github.com/gsantopaolo). Not affiliated with, endorsed by, or an official product of SISO, NASA or any other organization. SpaceFOM and SISO-STD-018-2020 are © SISO; this repository does not reproduce the standard and refers to it by clause. The `.proto` definitions are derived from the SpaceFOM FOM modules: Reprinted with permission from SISO Inc.
+Independent proposal by [Gian Paolo Santopaolo](https://github.com/gsantopaolo). Not affiliated with, endorsed by, or an official product of SISO, NASA or any other organization. SpaceFOM and SISO-STD-018-2020 are © SISO; this repository does not reproduce the standard and refers to it by clause. The `.proto` definitions are derived works of the SpaceFOM FOM modules, and the generated files copy the modules' `<semantics>` text into comments: Reprinted with permission from SISO Inc. Whether that text falls under SISO's "Schema" or "Documentation" licence is an [open question for the PDG](docs/technical-overview.md#open-questions-for-the-pdg).
 
 Prepared with Claude (Anthropic) as a research and drafting aid; every technical fact was checked against the primary sources listed in [verification](docs/verification.md).
 

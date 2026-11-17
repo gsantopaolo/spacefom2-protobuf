@@ -77,7 +77,7 @@ The repo owner will ask a Claude Code session to review the PR against the plan 
 | [`proposal/pcr-draft.md`](../../proposal/pcr-draft.md) | Proposal on the SISO PCR form (SISO-ADM-003 Appendix A) |
 | [`docs/technical-overview.md`](../technical-overview.md) | Mapping table HLA → Protobuf, example, architecture, SpaceFOM 2.0 changes, open questions |
 | [`docs/verification.md`](../verification.md) | Every technical claim with deep links to the source page/line |
-| [`docs/plans/generator-ci-plan.md`](../plans/generator-ci-plan.md) | Draft plan: FOM XML → `.proto` generator and PR-opening GitHub Action. **Not approved yet** |
+| [`docs/plans/generator-ci-plan.md`](../plans/generator-ci-plan.md) | Plan: FOM XML → `.proto` generator and PR-opening GitHub Action. Approved 2026-11-17; decisions in §9 |
 | [`docs/examples/reference_frame.proto`](../examples/reference_frame.proto) | Hand-written, verified example; compiles with `protoc` |
 | [`docs/images/bridge-architecture.svg`](../images/bridge-architecture.svg) | Architecture diagram used in README, pitch and overview |
 | `reference-docs/` (local only) | `standards/` (SISO-STD-018-2020 PDF, FOM XML from nasa/TrickHLA, HLA 4 summary paper, `SOURCES.md`), `process/` (SISO-ADM-003, SIW 2025 paper), `presentations/` (SIMposium 2026 slides), `fp-verification/` (Federate Protocol `.proto` sources), `questions-for-alfredo.md`, private notes |
@@ -90,16 +90,16 @@ Repository: `git@github.com:gsantopaolo/spacefom2-protobuf.git`, branch `main`, 
 - All datatype names, fields and encodings verified against SISO-STD-018-2020 Appendix C and the FOM XML.
 - Verified that HLA 4 Federate Protocol carries attribute and parameter values as opaque `bytes` (core argument of the proposal).
 - Proposer bio checked against the owner's LinkedIn profile; employer named as affiliation with management approval.
-- Generator/CI plan drafted and reviewed (not approved).
+- Generator/CI plan approved on 2026-11-17, with decisions D1 to D8 recorded in its §9.
 
 ## What is open
 
 | # | Item | Owner | Notes |
 |---|---|---|---|
-| 1 | Approve generator/CI plan and answer decisions D1–D8 | Repo owner | See §9 of the plan |
+| 1 | ~~Approve generator/CI plan and answer decisions D1–D8~~ | Repo owner | Done 2026-11-17 |
 | 2 | Send batched questions to the PDG vice chair | Repo owner | Currently 3: PCR form version, authoritative FOM XML source, licence of `<semantics>` text |
 | 3 | Make the repo public or add the vice chair as collaborator | Repo owner | Pitch links to the repo; private repo gives 404 |
-| 4 | Build the generator and GitHub Action | Agent, after #1 | Per the approved plan |
+| 4 | Build the generator and GitHub Action | Agent | In review on branch `feat/generator` |
 | 5 | Working prototype: bridge federate + Docker Compose demo (sample federation, bridge, non-HLA consumers) | Agent, after feasibility discussion | Then replace the "in progress" line in the pitch's Implementation status with the real link |
 | 6 | Additional technical docs and diagrams for the PDG hearing | Agent | |
 | 7 | Polished HTML → PDF version of the pitch | Agent | Keep it to one page |
