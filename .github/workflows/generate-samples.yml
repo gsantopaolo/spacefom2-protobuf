@@ -69,6 +69,7 @@ jobs:
         run: |
           protoc --version
           buf generate --template samples/buf.gen.yaml
+          python samples/attribution.py
           python samples/python/writer.py
       - name: Did the generated code or data change?
         id: diff

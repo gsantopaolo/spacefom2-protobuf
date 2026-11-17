@@ -6,6 +6,7 @@
 set -eu
 
 buf generate --template samples/buf.gen.yaml
+python samples/attribution.py
 python samples/python/writer.py
 
 echo "== python";     python samples/python/reader.py && python -m pytest -q samples/python
