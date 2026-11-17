@@ -105,7 +105,7 @@ gh workflow run generate-proto --ref main -f dry_run=true # report only
 gh run watch                                               # follow the run
 ```
 
-The pull request is opened with the repository's `GITHUB_TOKEN`, so workflows do not run on it again; the checks have already passed inside the generating run.
+The pull request is opened with the repository's `GITHUB_TOKEN`, and the checks have already passed inside the generating run. Its own checks wait as "awaiting approval" until someone with write access clicks "Approve workflows to run" ([GitHub changelog, 11 June 2026](https://github.blog/changelog/2026-06-11-bot-created-pull-requests-can-run-workflows-if-approved/)); approve them, then merge.
 
 ## Repository layout
 

@@ -65,7 +65,7 @@ A new workflow, `generate-samples.yml`, runs on changes to `proto/` or `samples/
 2. One matrix job per language sets up the toolchain, builds, runs the reader and runs the language's tests. The tests also round-trip each of the 18 message types with every field set, finding them through protobuf reflection.
 3. On `main`, a last job opens a pull request with the regenerated files.
 
-The generate-proto bot's pull request does not trigger other workflows, so the samples cannot be checked inside it. Instead, the second workflow runs once that pull request is merged into `main` and opens a follow-up pull request for the samples. **[S5]**
+The generate-proto bot's pull request runs other workflows only after a maintainer approves them ([GitHub changelog, 11 June 2026](https://github.blog/changelog/2026-06-11-bot-created-pull-requests-can-run-workflows-if-approved/)), so the samples are not regenerated inside it. Instead, the second workflow runs once that pull request is merged into `main` and opens a follow-up pull request for the samples. **[S5]**
 
 ## Versions
 
