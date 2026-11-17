@@ -7,6 +7,7 @@ Companion to the [one-page pitch](../proposal/pitch.md) and the [draft PCR](../p
 - [Where it fits](#where-it-fits)
 - [Encoding today](#encoding-today)
 - [Mapping](#mapping)
+- [Field numbers](#field-numbers)
 - [Example output](#example-output)
 - [SpaceFOM 2.0 changes the generator must follow](#spacefom-20-changes-the-generator-must-follow)
 - [References](#references)
@@ -35,7 +36,7 @@ SpaceFOM uses Little Endian everywhere except HLA logical time (`HLAinteger64Tim
 
 HLA 4's Federate Protocol does not change this. Its Protobuf messages carry each attribute or parameter value as an opaque `bytes` field (`AttributeHandleValue.value`, `ParameterHandleValue.value` in the IEEE 1516.1 Federate Protocol `datatypes.proto`, reprinted with permission from IEEE 1516.1(TM)-2024), so a consumer still needs the FOM and an HLA decoder to read the data.
 
-Aggregates are `HLAfixedArray` (3-vectors and 3×3 matrices, Tables C-3) and `HLAfixedRecord` (Tables C-4 to C-7). SpaceFOM 1.0 defines no variant records (§8.7.2.6).
+Aggregates are `HLAfixedArray` (3-vectors and 3×3 matrices, Table C-3) and `HLAfixedRecord` (Tables C-4 to C-7). SpaceFOM 1.0 defines no variant records (§8.7.2.6).
 
 ## Mapping
 
@@ -118,7 +119,7 @@ From the SISO SIMposium 2026 presentation "SpaceFOM V2 … and How You Can Help"
 - HLA 4 directed interactions and the new `Reference` datatype;
 - extended object classes drawn from NASA Artemis and ESA HRAF3 experience.
 
-Because the schema is generated from the FOM, each of these changes is handled by a rule in the generator, and the `.proto` files are not edited by hand.
+Because the schema is generated from the FOM, each of these changes becomes a rule in the generator; nobody edits the `.proto` files by hand.
 
 [proto3]: https://protobuf.dev/programming-guides/proto3/
 

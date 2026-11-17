@@ -4,7 +4,7 @@ Status: **draft for review**. Nothing here is built yet. Decisions are marked **
 
 ## Goal
 
-`docker compose up` starts a small SpaceFOM federation and shows its data leaving HLA as Protobuf. A reviewer sees reference frames and a moving vehicle arrive in tools that know nothing about HLA. This is the "working prototype" the [pitch](../../proposal/pitch.md) promises.
+`docker compose up` starts a small SpaceFOM federation and shows its data leaving HLA as Protobuf. A reviewer sees reference frames and a moving vehicle arrive in tools that know nothing about HLA. This is the "working demo" the [pitch](../../proposal/pitch.md) offers to present.
 
 ```mermaid
 flowchart LR

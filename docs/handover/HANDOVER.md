@@ -52,11 +52,12 @@ Two Claude Code sessions work on this repository, both pushing as the `gsantopao
 
 | Path | Contents |
 |---|---|
-| [`proposal/pitch.md`](../../proposal/pitch.md), [`.pdf`](../../proposal/pitch.pdf), [`.docx`](../../proposal/pitch.docx) | One-page pitch in the format the vice chair asked for. The PDF and Word files are rendered from the Markdown with `tools/render_pdf.py`; the `pitch-rendered` workflow fails a PR that changes one without the others |
+| [`proposal/pitch.md`](../../proposal/pitch.md), [`.pdf`](../../proposal/pitch.pdf), [`.docx`](../../proposal/pitch.docx) | One-page pitch in the format the vice chair asked for. The PDF and Word files are rendered from the Markdown with `tools/render_pdf.py`; the `pitch-rendered` workflow fails a PR that changes `pitch.md` without both of them |
 | [`proposal/open-questions.md`](../../proposal/open-questions.md) | Q1–Q8 for the PDG |
 | [`proposal/pcr-draft.md`](../../proposal/pcr-draft.md) | Proposal on the SISO PCR form (SISO-ADM-003 Appendix A) |
 | [`proposal/reference-repository.md`](../../proposal/reference-repository.md) | Where the schema, generator and samples should live if the PDG adopts them |
 | [`docs/hearing/technical-briefing.md`](../hearing/technical-briefing.md) | Briefing for the PDG hearing, with draw.io diagrams in [`docs/diagrams/`](../diagrams/) (sources and GIFs; `export.sh` regenerates them) |
+| [`docs/guides/testing-guide.md`](../guides/testing-guide.md) | Step-by-step testing: the `spacefom2` conda environment and local tests, a dry run from the GitHub Actions UI, and the full bot-PR flow in the web UI |
 | [`docs/technical-overview.md`](../technical-overview.md) | HLA → Protobuf mapping, field numbering, SpaceFOM 2.0 changes |
 | [`docs/verification.md`](../verification.md) | Every technical claim with a deep link to its source |
 | [`docs/plans/`](../plans/) | `generator-ci-plan.md` (approved, built), `samples-plan.md` (approved, built), `docker-demo-plan.md` (draft: decisions E1–E6 open) |
@@ -68,7 +69,7 @@ Two Claude Code sessions work on this repository, both pushing as the `gsantopao
 | `tools/` | `render_pdf.py`, the PR decision logic `generated_output_check.py`, the pitch check, and their tests |
 | `reference-docs/` (local only) | Standards, papers, SISO process documents (including PN-038), Federate Protocol sources, and the owner's private notes and draft message to the vice chair |
 
-Repository: `git@github.com:gsantopaolo/spacefom2-protobuf.git`, currently **private**. MIT licence.
+Repository: `git@github.com:gsantopaolo/spacefom2-protobuf.git`, public. MIT licence.
 
 ## How the automation works
 
@@ -108,7 +109,6 @@ This whole path was tested end to end on 17 November 2026 with a generator versi
 |---|---|---|
 | Docker demo plan: answer E1–E6 | Owner | [`docs/plans/docker-demo-plan.md`](../plans/docker-demo-plan.md). Nothing is built until it is marked approved |
 | Bridge federate and Docker demo | Implementation session, after approval | Then link the prototype in the pitch's Implementation status |
-| Make the repo public, or add the vice chair as collaborator | Owner | The pitch and the message link to it |
 | Send the vice chair the pitch, the briefing and the open questions | Owner | Draft message in `reference-docs/` |
 | Optional: dark-mode version of the diagrams | Either session | They have a white background |
 

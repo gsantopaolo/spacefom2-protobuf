@@ -31,7 +31,7 @@ The federation does not change. Two parts are new. The generator turns the FOM m
 3. The mapper applies the rules in the [mapping table](../technical-overview.md#mapping): `HLAfloat64LE` to `double`, fixed records to messages, enumerations to enums, object classes to messages with optional fields.
 4. Field numbers come from a committed lock file (next section).
 5. The emitter writes one `.proto` file per FOM module, with the SISO attribution and the input hashes in the header and no timestamps, so two runs give identical bytes.
-6. CI validates the output: unit, golden and idempotence tests, `protoc`, `buf lint` and `buf breaking`. If the output changed, it archives the previous tree under `history/` and opens a pull request for review.
+6. CI validates the output: unit, golden and idempotence tests, `protoc`, `buf lint` and `buf breaking`. If the output changed on `main`, it archives the previous tree under `history/` and opens a pull request for review.
 
 From the SpaceFOM 1.0 modules the generator produces four files (`datatypes`, `environment`, `entity`, `management`). Its 27 tests pass, and a workflow [dry run](https://github.com/gsantopaolo/spacefom2-protobuf/actions/runs/44079591250) on 17 November 2026 ran every validation step; it skipped archiving and opening the PR, as dry runs and runs without changes do.
 

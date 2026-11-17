@@ -22,5 +22,5 @@ Instructions for Claude Code sessions and other agents. The project's ground rul
 ## How changes land
 
 - Work on a branch and open a pull request to `main`. Never push to `main`.
-- Another agent reviews and merges pull requests (currently the `spacefom2` session). Message it when a PR is ready, and do not merge your own.
+- Another agent reviews and merges pull requests: currently the `spacefom2` session, whose own PRs the `spacefom2-implementation` session reviews and merges. Message the reviewer when a PR is ready, and do not merge your own.
 - When a review finding turns into an issue, fix it in a PR that says `Closes #n`.
