@@ -11,3 +11,6 @@ __pycache__/
 # Generated / build output
 build/
 dist/
+
+# Private reference material (never commit)
+reference-docs/
