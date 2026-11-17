@@ -72,7 +72,28 @@ python -m pytest generator/tests
 
 `generate --check` writes nothing and fails if the committed files are out of date. `--no-semantics` leaves the FOM's `<semantics>` text out of the comments, and `--no-interactions` leaves out `ModeTransitionRequest`. Field numbers are kept stable by [`generator/field-ids.lock.json`](generator/field-ids.lock.json) (see [Field numbers](docs/technical-overview.md#field-numbers)).
 
-The [`generate-proto`](.github/workflows/generate-proto.yml) workflow runs the same steps in CI. On a pull request it fails if `proto/` is stale. On `main` it regenerates, runs `buf lint` and `buf breaking`, copies the previous tree into `history/`, and opens a pull request when the output changes.
+### Triggering the generation in CI
+
+The [`generate-proto`](.github/workflows/generate-proto.yml) workflow runs the same steps on GitHub. What it does depends on how it starts:
+
+| Trigger | What happens |
+|---|---|
+| Push to `main` that changes `fom/`, `generator/`, `buf.yaml` or the workflow | Regenerates, runs the tests, `buf lint` and `buf breaking`. If the output changed, it copies the previous tree into `history/` and opens (or updates) a pull request from `generator/proto-update` |
+| Push to any other branch, same paths | The same run as a dry run: it reports what would change and never opens a pull request |
+| Pull request | Check only: fails if the committed `proto/` or lock file is out of date |
+| Manual run | Same as a push to the branch you pick; tick `dry_run` to skip the pull request on `main` |
+
+To update the schema to a newer FOM, edit [`fom/SOURCE.json`](fom/SOURCE.json) (the upstream commit and the sha256 of each file) and merge that change into `main`. The workflow then opens the pull request with the regenerated files.
+
+To start a run by hand, open Actions → generate-proto → Run workflow, or use the GitHub CLI:
+
+```sh
+gh workflow run generate-proto --ref main                # regenerate and open a PR if anything changed
+gh workflow run generate-proto --ref main -f dry_run=true # report only
+gh run watch                                               # follow the run
+```
+
+The pull request is opened with the repository's `GITHUB_TOKEN`, so workflows do not run on it again; the checks have already passed inside the generating run.
 
 ## Repository layout
 
