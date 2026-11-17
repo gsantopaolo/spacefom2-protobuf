@@ -1,5 +1,5 @@
 {
-  "format": 1,
+  "format": 2,
   "messages": {
     "AccelerationVector": {
       "fields": {
@@ -163,6 +163,5 @@
       },
       "retired": []
     }
-  },
-  "renames": {}
+  }
 }
