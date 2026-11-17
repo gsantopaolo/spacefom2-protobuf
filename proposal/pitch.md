@@ -28,11 +28,7 @@ Roles, synchronization and time management stay in HLA, which remains the source
 
 ## Implementation status
 
-Open-source work at **[github.com/gsantopaolo/spacefom2-protobuf](https://github.com/gsantopaolo/spacefom2-protobuf)**:
-
-- built: a [generator](https://github.com/gsantopaolo/spacefom2-protobuf/tree/main/generator) that turns the SpaceFOM 1.0 FOM XML into the [`siso.spacefom.v1` schema](https://github.com/gsantopaolo/spacefom2-protobuf/tree/main/proto/siso/spacefom/v1), with stable field numbers and a CI workflow that regenerates it and opens a pull request when the FOM changes;
-- built: [samples](https://github.com/gsantopaolo/spacefom2-protobuf/tree/main/samples) in C++, Python, Java, C#, TypeScript and Go that decode the same data, tested in CI;
-- planned: the bridge federate and a one-command Docker demo of a small SpaceFOM federation ([technical briefing](https://github.com/gsantopaolo/spacefom2-protobuf/blob/main/docs/hearing/technical-briefing.md)).
+The work is open source at **[github.com/gsantopaolo/spacefom2-protobuf](https://github.com/gsantopaolo/spacefom2-protobuf)**. A [generator](https://github.com/gsantopaolo/spacefom2-protobuf/tree/main/generator) already turns the SpaceFOM 1.0 FOM XML into the [`siso.spacefom.v1` schema](https://github.com/gsantopaolo/spacefom2-protobuf/tree/main/proto/siso/spacefom/v1) with stable field numbers, and CI regenerates it and opens a pull request when the FOM changes. [Samples](https://github.com/gsantopaolo/spacefom2-protobuf/tree/main/samples) in C++, Python, Java, C#, TypeScript and Go decode the same data and are tested in CI. The bridge federate and a one-command Docker demo of a small SpaceFOM federation are planned ([technical briefing](https://github.com/gsantopaolo/spacefom2-protobuf/blob/main/docs/hearing/technical-briefing.md)).
 
 ## Who proposes it
 

@@ -1,6 +1,6 @@
 # Open questions for the SpaceFOM 2.0 PDG
 
-The decisions this proposal needs from the PDG, in one list. Each question has the context needed to answer it and a link to where it matters. Answers will be recorded here as they arrive.
+The decisions this proposal needs from the PDG. Answers will be recorded here as they arrive.
 
 ## Contents
 
