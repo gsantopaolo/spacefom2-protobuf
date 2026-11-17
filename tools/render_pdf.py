@@ -8,6 +8,8 @@ Needs: pandoc (https://pandoc.org), Google Chrome (for the PDF) and rsvg-convert
 from librsvg (SVG to PNG for Word). On macOS: brew install pandoc librsvg.
 Usage (from the repository root):
     python tools/render_pdf.py proposal/pitch.md     # writes build/pitch.html, build/pitch.pdf, build/pitch.docx
+    python tools/render_pdf.py proposal/pitch.md --out proposal && rm proposal/pitch.html
+        # refreshes the committed proposal/pitch.pdf and proposal/pitch.docx; run it whenever pitch.md changes
 """
 
 from __future__ import annotations

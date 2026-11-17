@@ -25,7 +25,7 @@ Federation roles, synchronization and time management stay in HLA; the schema is
 
 | Document | What it is |
 |---|---|
-| **[One-page pitch](proposal/pitch.md)** | Problem, solution, expected benefits, proposer: the summary for the SpaceFOM 2.0 PDG |
+| **[One-page pitch](proposal/pitch.md)** ([PDF](proposal/pitch.pdf), [Word](proposal/pitch.docx)) | Problem, solution, expected benefits, proposer: the summary for the SpaceFOM 2.0 PDG |
 | [Draft PCR](proposal/pcr-draft.md) | The proposal on the SISO Problem/Change Request form (SISO-ADM-003, Appendix A) |
 | [Technical briefing for the hearing](docs/hearing/technical-briefing.md) | How the proposal works, with diagrams: architecture, generator pipeline, the path of one update, field numbering |
 | [Open questions for the PDG](proposal/open-questions.md) | Every decision the proposal needs from the PDG, with context |
