@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 # Tests for check_pitch_rendered.sh: sh tools/test_check_pitch_rendered.sh
 set -u
-cd "$(dirname "$0")"
+cd "$(dirname "$0")" || exit 1
 fails=0
 
 expect() {  # expect <exit code> <description> <changed paths...>

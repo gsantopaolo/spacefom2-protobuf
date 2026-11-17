@@ -1,6 +1,6 @@
 # Regenerate the SpaceFOM .proto files from the pinned FOM modules, validate
 # them, and open (or update) a pull request when the output changes.
-# Design: docs/plans/generator-ci-plan.md §5 and §6.
+# Design: docs/plans/generator-ci-plan.md §5 and §6; pull request flow: #19.
 name: generate-proto
 
 on:
@@ -16,6 +16,7 @@ on:
       - fom/**
       - generator/**
       - buf.yaml
+      - tools/generated_output_check.py
       - .github/workflows/generate-proto.yml
   pull_request:
     paths:
@@ -23,6 +24,8 @@ on:
       - generator/**
       - proto/**
       - buf.yaml
+      - tools/generated_output_check.py
+      - tools/test_generated_output_check.py
       - .github/workflows/generate-proto.yml
 
 permissions:
@@ -33,45 +36,15 @@ env:
   FOM_DIR: build/fom
 
 jobs:
-  # Pull requests: regenerate, validate, and fail if the committed proto/ is stale.
-  check:
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          fetch-depth: 0
-      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-          cache: pip
-          cache-dependency-path: generator/requirements.txt
-      - run: pip install -r generator/requirements.txt
-      - name: Fetch pinned FOM modules
-        run: PYTHONPATH=generator python -m spacefom_proto fetch --dest "$FOM_DIR"
-      - name: Committed output is up to date
-        run: PYTHONPATH=generator python -m spacefom_proto generate --fom-dir "$FOM_DIR" --check
-      - name: Unit, golden and idempotence tests
-        run: SPACEFOM_FOM_DIR="$FOM_DIR" SPACEFOM_REQUIRE_FOM=1 python -m pytest generator/tests -q
-      - uses: bufbuild/buf-action@37ac33d8960807670a6e9719080e885197b09cc6 # v1.7.0
-        with:
-          setup_only: true
-      - run: buf lint
-      - name: buf breaking (WIRE) against the base branch
-        run: |
-          base="origin/${{ github.base_ref }}"
-          if git ls-tree -d --name-only "$base" proto | grep -q .; then
-            buf breaking --against ".git#ref=$base"
-          else
-            echo "No proto/ on $base yet; skipping breaking check."
-          fi
-
-  # Push and manual runs: regenerate and validate; if anything changed, archive
-  # the previous tree. All validation runs here, because a PR opened with
-  # GITHUB_TOKEN does not trigger other workflows (plan §6, step 6).
-  # Read-only: dry runs on other branches never get write permissions (#4).
+  # Every event: regenerate, then validate the fresh output. All validation runs
+  # here, because a PR opened with GITHUB_TOKEN does not trigger other workflows
+  # (plan §6, step 6). Read-only: dry runs and pull requests never get write
+  # permissions (#4).
+  #
+  # On a pull request, the committed proto/ may be stale when only the inputs
+  # changed; the bot regenerates it after the merge. Hand-edited output that
+  # does not match the generator still fails (tools/generated_output_check.py).
   generate:
-    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     outputs:
       changed: ${{ steps.diff.outputs.changed }}
@@ -87,6 +60,8 @@ jobs:
           cache: pip
           cache-dependency-path: generator/requirements.txt
       - run: pip install -r generator/requirements.txt
+      - name: Tests for the pull-request decision logic
+        run: python -m pytest tools -q
       - name: Fetch pinned FOM modules
         run: PYTHONPATH=generator python -m spacefom_proto fetch --dest "$FOM_DIR"
       - name: Keep a copy of the current proto tree
@@ -101,29 +76,47 @@ jobs:
         run: SPACEFOM_FOM_DIR="$FOM_DIR" SPACEFOM_REQUIRE_FOM=1 python -m pytest generator/tests -q
       - name: Regenerating again changes nothing
         run: PYTHONPATH=generator python -m spacefom_proto generate --fom-dir "$FOM_DIR" --check
+      - name: Fresh output compiles with protoc
+        run: python -m grpc_tools.protoc -Iproto --descriptor_set_out=/dev/null proto/siso/spacefom/v1/*.proto
       - uses: bufbuild/buf-action@37ac33d8960807670a6e9719080e885197b09cc6 # v1.7.0
         with:
           setup_only: true
       - run: buf lint
-      - name: buf breaking (WIRE) against main
+      - name: buf breaking (WIRE) against the base branch
+        env:
+          BASE: origin/${{ github.event_name == 'pull_request' && github.base_ref || 'main' }}
         run: |
-          if git ls-tree -d --name-only origin/main proto | grep -q .; then
-            buf breaking --against ".git#ref=origin/main"
+          if git ls-tree -d --name-only "$BASE" proto | grep -q .; then
+            buf breaking --against ".git#ref=$BASE"
           else
-            echo "No proto/ on main yet; skipping breaking check."
+            echo "No proto/ on $BASE yet; skipping breaking check."
           fi
       - name: Did the generated output change?
         id: diff
         run: |
-          if [ -z "$(git status --porcelain -- proto generator/field-ids.lock.json)" ]; then
-            echo "changed=false" >> "$GITHUB_OUTPUT"
-            echo "Generated output is unchanged." >> "$GITHUB_STEP_SUMMARY"
-          else
+          git status --porcelain --untracked-files=all -- proto generator/field-ids.lock.json \
+            | cut -c4- > "$RUNNER_TEMP/stale.txt"
+          if [ -s "$RUNNER_TEMP/stale.txt" ]; then
             echo "changed=true" >> "$GITHUB_OUTPUT"
-            git status --porcelain -- proto generator/field-ids.lock.json
+            cat "$RUNNER_TEMP/stale.txt"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
           fi
+      - name: Pull request - is the committed output acceptable?
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        # `shell: bash` runs with -o pipefail, so a failing check is not hidden by tee.
+        shell: bash
+        run: |
+          git diff --name-only "$BASE_SHA" HEAD > "$RUNNER_TEMP/changed.txt"
+          python tools/generated_output_check.py --name proto \
+            --output proto/ --output generator/field-ids.lock.json \
+            --input fom/ --input generator/ --input buf.yaml \
+            --changed "$RUNNER_TEMP/changed.txt" --stale "$RUNNER_TEMP/stale.txt" \
+            | tee -a "$GITHUB_STEP_SUMMARY"
       - name: Archive the previous proto tree into history/
-        if: steps.diff.outputs.changed == 'true'
+        if: github.event_name != 'pull_request' && steps.diff.outputs.changed == 'true'
         run: |
           PYTHONPATH=generator python -m spacefom_proto archive \
             --proto "$RUNNER_TEMP/previous/proto" --history history --main-commit "$GITHUB_SHA"
@@ -132,9 +125,9 @@ jobs:
           echo "Dry run: $DRY_RUN" >> "$GITHUB_STEP_SUMMARY"
           cat "$RUNNER_TEMP/report.md" >> "$GITHUB_STEP_SUMMARY"
       - name: Keep the result for the pull-request job
-        if: steps.diff.outputs.changed == 'true'
+        if: github.event_name != 'pull_request' && steps.diff.outputs.changed == 'true'
         run: mkdir -p build && cp "$RUNNER_TEMP/report.md" build/report.md
-      - if: steps.diff.outputs.changed == 'true'
+      - if: github.event_name != 'pull_request' && steps.diff.outputs.changed == 'true'
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: proto-update
@@ -150,6 +143,7 @@ jobs:
     needs: generate
     if: >-
       needs.generate.outputs.changed == 'true' &&
+      github.event_name != 'pull_request' &&
       github.ref == 'refs/heads/main' &&
       inputs.dry_run != true
     runs-on: ubuntu-latest

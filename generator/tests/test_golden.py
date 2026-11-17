@@ -55,7 +55,6 @@ def test_regeneration_is_byte_identical_and_idempotent():
     assert first.files == second.files
     assert first.lock_text == second.lock_text
     assert second.changes.empty() and not second.changes.new_messages
-    # And the committed tree is what the generator produces.
-    assert first.lock_text == LOCK.read_text(encoding="utf-8")
-    for rel, text in first.files.items():
-        assert (PROTO / rel).read_text(encoding="utf-8") == text, rel
+    # Whether the committed proto/ matches is decided by the workflow
+    # (tools/generated_output_check.py): a PR may change the generator and
+    # leave proto/ for the bot to regenerate after the merge (#19).
