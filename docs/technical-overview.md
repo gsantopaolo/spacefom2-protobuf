@@ -24,6 +24,8 @@ SpaceFOM uses Little Endian everywhere except HLA logical time (`HLAinteger64Tim
 | `HLAinteger64Time` | HLA logical time and lookahead |
 | `HLAunicodeString` | Names and identifiers (e.g. `ReferenceFrame.name`, `PhysicalEntity.parent_reference_frame`) |
 
+HLA 4's Federate Protocol does not change this. Its Protobuf messages carry each attribute or parameter value as an opaque `bytes` field (`AttributeHandleValue.value`, `ParameterHandleValue.value` in the IEEE 1516.1 Federate Protocol `datatypes.proto`, reprinted with permission from IEEE 1516.1(TM)-2024), so a consumer still needs the FOM and an HLA decoder to read the data.
+
 Aggregates are `HLAfixedArray` (3-vectors and 3×3 matrices, Tables C-3) and `HLAfixedRecord` (Tables C-4 to C-7). SpaceFOM 1.0 defines no variant records (§8.7.2.6).
 
 ## Mapping

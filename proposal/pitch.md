@@ -4,7 +4,7 @@
 
 ## Problem
 
-SpaceFOM data can only be consumed by software that speaks HLA. Reference frames, space-time coordinate states and entities travel as HLA-encoded records (`HLAfloat64LE` fields in `HLAfixedRecord`s, SISO-STD-018-2020 §8.7). A cloud pipeline, a Kafka stream, a ROS 2 node or an MBSE/data-analysis tool that just wants to read a vehicle's state must hand-write decoders for every type, with no shared, versioned schema. HLA 4 already defines its Federate Protocol services layer in Protobuf (SISO SIW 2026-028 §2.1), but the SpaceFOM data itself has no equivalent.
+SpaceFOM data can only be consumed by software that speaks HLA. Reference frames, space-time coordinate states and entities travel as HLA-encoded records (`HLAfloat64LE` fields in `HLAfixedRecord`s, SISO-STD-018-2020 §8.7). A cloud pipeline, a Kafka stream, a ROS 2 node or an MBSE/data-analysis tool that just wants to read a vehicle's state must hand-write decoders for every type, with no shared, versioned schema. HLA 4 already defines its Federate Protocol services layer in Protobuf (SISO SIW 2026-028 §2.1), yet attribute values still travel inside those messages as opaque `bytes` (IEEE 1516.1 Federate Protocol `AttributeHandleValue`): the SpaceFOM data itself has no schema outside HLA.
 
 ## Hypothesis and solution
 
