@@ -22,7 +22,7 @@ Form layout and field instructions from SISO-ADM-003, *SISO Balloted Products De
 | Date | _to fill on submission_ |
 | Phone | _to fill_ |
 | Email | gianpaolo.santopaolo@gmail.com |
-| Affiliation | _to confirm (personal capacity or Alloy Therapeutics)_ |
+| Affiliation | Alloy Therapeutics (Switzerland) AG; contribution made in personal time |
 | Submitter willing to be lead analyst | Yes |
 | Associated analysts | — |
 | Source | Spec: X · Other: X (interoperability with non-HLA tools) |
