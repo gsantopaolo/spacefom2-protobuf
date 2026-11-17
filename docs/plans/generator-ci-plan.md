@@ -106,7 +106,7 @@ The strategy is a committed lock file, `generator/field-ids.lock.json`:
 **Triggers (proposed):**
 - `workflow_dispatch`, for on-demand runs. It supports inputs [S3], for example `dry_run`.
 - `push` to `main` with `paths:` `fom/**`, `generator/**` and the workflow file [S3]. Merging a generated PR changes `proto/` and `history/`, which are not in the filter. The workflow is idempotent anyway, so it would be a no-op.
-- `pull_request` with the same paths, in **check mode** only: regenerate, validate, and fail if the committed `proto/` is stale. It never opens a PR.
+- `pull_request` with the same paths, in **check mode** only: regenerate and run every check on the fresh output. It never opens a PR. A PR that changes only the inputs may leave `proto/` stale, because the bot regenerates it after the merge. A PR that edits `proto/` or the lock file by hand fails if they don't match the generator ([#19](https://github.com/gsantopaolo/spacefom2-protobuf/issues/19), decided by `tools/generated_output_check.py`).
 - Optional `schedule` (weekly) that checks whether TrickHLA's FOM files changed upstream and opens a PR updating `fom/SOURCE.json`. **[D7]**
 
 **Generate job steps:**

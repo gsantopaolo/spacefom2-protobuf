@@ -15,21 +15,21 @@ The package names (`org.siso.spacefom.v1` in Java, `Siso.Spacefom.V1` in C#) are
 
 ## How the pieces are produced
 
-Two GitHub Actions workflows run one after the other. The first turns the FOM XML into `.proto` files. When those changes reach `main`, the second turns the `.proto` files into code for each language and tests it. Each workflow ends by opening a pull request, which is reviewed before it is merged.
+Two GitHub Actions workflows run one after the other. The first turns the FOM XML into `.proto` files. When those changes reach `main`, the second turns the `.proto` files into code for each language and tests it. Each workflow ends by opening a pull request, which is reviewed before it is merged. A FOM change therefore reaches the samples through three merges:
 
 ```mermaid
 flowchart TD
-    A["SpaceFOM FOM modules (XML)<br/>pinned in fom/SOURCE.json"] -->|"workflow 1: generate-proto<br/>generator/ (Python)"| B["proto/siso/spacefom/v1/*.proto<br/>+ field-number lock file"]
-    B -->|"pull request, reviewed and merged"| M["main"]
-    M -->|"workflow 2: generate-samples<br/>buf generate, attribution.py, writer.py"| C["samples/generated/&lt;language&gt;/<br/>samples/data/*.binpb"]
-    C --> T["build and test in C++, Python, Java,<br/>C#, TypeScript and Go"]
-    T -->|"pull request, reviewed and merged"| M2["main"]
+    P["Pull request that changes the inputs<br/>(for example fom/SOURCE.json)"] -->|"checks run on freshly generated output;<br/>reviewed and merged"| M0["main"]
+    M0 -->|"workflow 1: generate-proto<br/>generator/ (Python)"| B["bot pull request:<br/>proto/siso/spacefom/v1/*.proto, lock file, history/"]
+    B -->|"reviewed and merged"| M1["main"]
+    M1 -->|"workflow 2: generate-samples<br/>buf generate, attribution.py, writer.py;<br/>build and test six languages"| C["bot pull request:<br/>samples/generated/&lt;language&gt;/, samples/data/"]
+    C -->|"reviewed and merged"| M2["main"]
 ```
 
 1. [`generate-proto`](../.github/workflows/generate-proto.yml) runs when `fom/`, `generator/` or its own file changes on `main`. It downloads the pinned FOM modules, runs the generator, validates the result (`protoc`, tests, `buf lint`, `buf breaking`) and opens a pull request that updates `proto/`.
 2. [`generate-samples`](../.github/workflows/generate-samples.yml) runs when `proto/` or `samples/` changes. Merging the first pull request changes `proto/`, so the second workflow starts by itself. It runs `buf generate` with [`buf.gen.yaml`](buf.gen.yaml) and `attribution.py`, rewrites the data files, builds and tests all six languages in parallel, and opens a pull request that updates `samples/generated/` and `samples/data/`.
 
-On a pull request, each workflow only checks: it fails if the committed files are out of date or a test fails. On branches other than `main`, it runs as a dry run and opens no pull request. You can also start either one by hand from the Actions tab, with a `dry_run` option.
+On a pull request, each workflow regenerates its output and runs every check on the fresh result, but opens nothing. A pull request that changes only the inputs passes even though its committed output is now out of date; the run summary says the bot will regenerate it after the merge. A pull request that edits generated files by hand fails if they don't match what the generator produces. [`tools/generated_output_check.py`](../tools/generated_output_check.py) makes that decision and has its own tests. On branches other than `main`, each workflow runs as a dry run and opens no pull request. You can also start either one by hand from the Actions tab, with a `dry_run` option.
 
 ## What the code does
 
