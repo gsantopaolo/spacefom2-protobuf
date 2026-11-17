@@ -1,0 +1,38 @@
+syntax = "proto3";
+package siso.spacefom.v1;
+
+// PositionVector, VelocityVector, AngularVelocityVector, Vector:
+// HLAfixedArray of 3 x HLAfloat64LE
+message PositionVector        { double x = 1; double y = 2; double z = 3; }  // m
+message VelocityVector        { double x = 1; double y = 2; double z = 3; }  // m/s
+message AngularVelocityVector { double x = 1; double y = 2; double z = 3; }  // rad/s
+message Vector                { double x = 1; double y = 2; double z = 3; }  // unitless
+
+// Left unit transformation quaternion, Q = (s, V)
+message AttitudeQuaternion {
+  double scalar = 1;
+  Vector vector = 2;
+}
+
+message ReferenceFrameTranslation {
+  PositionVector position = 1;
+  VelocityVector velocity = 2;
+}
+
+message ReferenceFrameRotation {
+  AttitudeQuaternion attitude_quaternion = 1;
+  AngularVelocityVector angular_velocity = 2;
+}
+
+message SpaceTimeCoordinateState {
+  ReferenceFrameTranslation translational_state = 1;
+  ReferenceFrameRotation rotational_state = 2;
+  double time = 3;  // Time: simulated physical time (TT), s
+}
+
+// Object class HLAobjectRoot.ReferenceFrame
+message ReferenceFrame {
+  optional string name = 1;
+  optional string parent_name = 2;  // empty for the root frame
+  optional SpaceTimeCoordinateState state = 3;
+}
