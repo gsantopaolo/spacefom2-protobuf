@@ -1,6 +1,6 @@
 # Plan: FOM XML → `.proto` generator with CI
 
-Status: **draft for review**. Nothing here is built yet. Decisions you need to make are marked **[D1]…[D8]** and collected in §9.
+Status: **approved** by the repo owner on 2026-11-17. Decisions **[D1]…[D8]** are answered in §9. Implementation is on branch `feat/generator`.
 
 Bracketed numbers like [S3] point to the Sources list at the end. Facts about the FOM come from the five XML files in `reference-docs/standards/fom-xml-trickhla/`. I checked those files byte for byte against `nasa/TrickHLA` `master` on 2026-11-17 and they are identical.
 
@@ -171,14 +171,20 @@ Either way, generated files carry the SISO attribution line, and `README.md` sho
 
 ## 9. Decisions for you
 
-- **D1** FOM source: fetch a pinned upstream at CI time (A), or vendor into `fom/` (B) after asking SISO/NASA?
-- **D2** One `.proto` per FOM module, or a single file? Package `siso.spacefom.v1`?
-- **D3** Scope: datatypes, environment and entity only, or also management? Exclude TrickHLA's `management2.xml`?
-- **D4** Enum names: keep the FOM names (`EXEC_MODE_*`) and relax buf lint, or rename to buf style? What should the synthetic zero value for `MTRMode` be called?
-- **D5** Emit interaction classes (`ModeTransitionRequest`)?
-- **D6** Renames: always a new number (safe), or allow a reviewer-curated `renames` map?
-- **D7** Add a scheduled upstream-change check?
-- **D8** Is `GITHUB_TOKEN` enough (checks run only inside the generator job), or set up a GitHub App token so CI runs on the bot PR?
+Answered by the repo owner on 2026-11-17.
+
+| # | Question | Decision |
+|---|---|---|
+| D1 | FOM source: pinned upstream fetch (A) or vendored (B)? | A. `fom/SOURCE.json` pins the nasa/TrickHLA commit and the sha256 of each file. CI downloads them at run time. Nothing SISO-copyrighted is committed until the licence question is answered |
+| D2 | One `.proto` per module or a single file? Package? | One file per FOM module (`datatypes`, `environment`, `entity`, `management`), package `siso.spacefom.v1` |
+| D3 | Scope | All four SISO modules (datatypes, environment, entity, management). TrickHLA's `management2.xml` is excluded |
+| D4 | Enum names and zero value | Keep the FOM names (`EXEC_MODE_*`, `MTR_*`) and relax buf lint for `ENUM_VALUE_PREFIX` and `ENUM_ZERO_VALUE_SUFFIX`. `ExecutionMode` already has `EXEC_MODE_UNINITIALIZED = 0`. `MTRMode` gets the synthetic zero value `MTR_MODE_UNSPECIFIED = 0` |
+| D5 | Emit interactions? | Yes, behind a generator flag that defaults to on |
+| D6 | Renames | A rename gets a new number by default and is listed under "needs human review" in the PR body. The lock file has an optional, reviewer-curated `renames` map that keeps the old number |
+| D7 | Scheduled upstream check | Not now. Triggers are `workflow_dispatch`, `push` and `pull_request` only |
+| D8 | Token | `GITHUB_TOKEN`. All validation runs inside the generator job. The owner enables "Allow GitHub Actions to create and approve pull requests" in the repo settings |
+
+For §7 open point (a), the generator copies `<semantics>` text verbatim into comments behind a flag that is on by default. If SISO classes the text as "Documentation" (non-commercial only), we regenerate with the flag off. The question is listed for the PDG in [`technical-overview.md`, Open questions for the PDG](../technical-overview.md#open-questions-for-the-pdg).
 
 ## Sources
 

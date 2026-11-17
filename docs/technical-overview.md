@@ -114,6 +114,7 @@ Because the schema is generated from the FOM, each of these changes is handled b
 1. Scope: environment and entity modules only, or also management (`ExecutionConfiguration`, `ModeTransitionRequest`)?
 2. Status: informative annex first, normative later?
 3. Package naming and versioning of the published `.proto` files.
+4. Licence of the `<semantics>` text. Every FOM module carries SISO's copyright notice with two grants: "Schema and API" (any purpose, with the attribution "Reprinted with permission from SISO Inc.") and "Documentation" (non-commercial purposes only). The generator copies `<semantics>` text verbatim into `.proto` comments. Does that text count as Schema or as Documentation? And can generated `.proto` files that contain it, with the SISO attribution, be published in an MIT-licensed open-source repository, or is permission from the SISO Board needed? Until this is answered, the generator can leave the text out with a flag.
 
 ## References
 
