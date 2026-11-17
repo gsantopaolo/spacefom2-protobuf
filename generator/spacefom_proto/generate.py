@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from .emit import PACKAGE_DIR, render
-from .ids import Changes, assign, dump_lock
+from .ids import RENAMES_FILE, Changes, assign, dump_lock
 from .mapping import Mapper, ProtoMessage
 from .model import GeneratorError
 from .parse import module_key, parse_module
@@ -50,6 +50,7 @@ def generate(
     lock: dict,
     semantics: bool = True,
     interactions: bool = True,
+    renames: dict[str, dict[str, str]] | None = None,
 ) -> Result:
     modules = [parse_module(p) for p in paths]
     keys = [module_key(p.name) for p in paths]
@@ -65,7 +66,7 @@ def generate(
         for item in f.items
         if isinstance(item, ProtoMessage)
     }
-    lock, changes = assign(lock, messages)
+    lock, changes = assign(lock, messages, renames)
 
     files = {}
     for f in Mapper(modules, interactions=interactions).map():
@@ -86,7 +87,7 @@ def report(changes: Changes) -> str:
         ("Added fields", [f"`{m}.{f}` = {n}" for m, f, n in changes.added
                           if m not in changes.new_messages]),
         ("Retired fields (now `reserved`)", [f"`{m}.{f}` was {n}" for m, f, n in changes.retired]),
-        ("Renamed fields (from the lock file `renames` map)",
+        (f"Renamed fields (from `{RENAMES_FILE}`)",
          [f"`{m}.{old}` -> `{m}.{new}` keeps {n}" for m, old, new, n in changes.renamed]),
         ("Removed messages", [f"`{m}`" for m in changes.removed_messages]),
     ):
@@ -101,7 +102,11 @@ def report(changes: Changes) -> str:
         lines.append("")
         lines.append(
             "These messages gained and lost fields in the same run. If a field was renamed, "
-            "add it to `renames` in `generator/field-ids.lock.json` and rerun, so it keeps its number."
+            f"add it to `{RENAMES_FILE}` as "
+            '`{"Message": {"new_name": "old_name"}}` in a pull request to `main`, and merge '
+            "that pull request before this one. The bot then regenerates this pull request and "
+            "the new name keeps the old number. After this pull request is merged, the new "
+            "number is in the lock and the rename can no longer be applied."
         )
         lines.append("")
         lines.extend(f"- `{m}`" for m in review)

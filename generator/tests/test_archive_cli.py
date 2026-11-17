@@ -32,8 +32,11 @@ def test_cli_check_and_write(tmp_path, capsys):
     source = tmp_path / "SOURCE.json"
     source.write_text(json.dumps({"files": [
         {"name": path.name, "sha256": hashlib.sha256(path.read_bytes()).hexdigest()}]}))
+    renames = tmp_path / "renames.json"
+    renames.write_text("{}")
     args = ["generate", "--fom-dir", str(fom), "--source", str(source),
-            "--out", str(tmp_path / "proto"), "--lock", str(tmp_path / "lock.json")]
+            "--out", str(tmp_path / "proto"), "--lock", str(tmp_path / "lock.json"),
+            "--renames", str(renames)]
     assert main(args + ["--check"]) == 1
     assert main(args) == 0
     assert main(args + ["--check"]) == 0

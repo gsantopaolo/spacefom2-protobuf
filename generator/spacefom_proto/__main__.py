@@ -10,14 +10,17 @@ from .archive import archive
 from .emit import PACKAGE_DIR
 from .fetch import fetch
 from .generate import generate, load_source, report, verify_inputs
-from .ids import load_lock
+from .ids import RENAMES_FILE, load_lock, load_renames
 from .model import GeneratorError
 
 
 def _generate(args) -> int:
     source = load_source(args.source)
     paths = verify_inputs(args.fom_dir, source)
-    result = generate(paths, load_lock(args.lock), not args.no_semantics, not args.no_interactions)
+    result = generate(
+        paths, load_lock(args.lock), not args.no_semantics, not args.no_interactions,
+        load_renames(args.renames),
+    )
     if args.report:
         args.report.write_text(report(result.changes), encoding="utf-8")
 
@@ -76,6 +79,8 @@ def main(argv: list[str] | None = None) -> int:
     g.add_argument("--source", type=Path, default=Path("fom/SOURCE.json"))
     g.add_argument("--out", type=Path, default=Path("proto"))
     g.add_argument("--lock", type=Path, default=Path("generator/field-ids.lock.json"))
+    g.add_argument("--renames", type=Path, default=Path(RENAMES_FILE),
+                   help='reviewer-edited renames, {"Message": {"new_name": "old_name"}}')
     g.add_argument("--no-semantics", action="store_true", help="leave FOM <semantics> text out of comments")
     g.add_argument("--no-interactions", action="store_true", help="do not emit interaction classes")
     g.add_argument("--check", action="store_true", help="write nothing; fail if committed output is stale")
