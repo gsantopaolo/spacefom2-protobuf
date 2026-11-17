@@ -75,7 +75,7 @@ The repo owner will ask a Claude Code session to review the PR against the plan 
 |---|---|
 | [`proposal/pitch.md`](../../proposal/pitch.md) | One-page pitch: problem, hypothesis/solution, benefits, implementation status, proposer. Format requested by the PDG |
 | [`proposal/pcr-draft.md`](../../proposal/pcr-draft.md) | Proposal on the SISO PCR form (SISO-ADM-003 Appendix A) |
-| [`docs/technical-overview.md`](../technical-overview.md) | Mapping table HLA → Protobuf, example, architecture, SpaceFOM 2.0 changes, open questions |
+| [`docs/technical-overview.md`](../technical-overview.md) | Mapping table HLA → Protobuf, example, architecture, SpaceFOM 2.0 changes |
 | [`docs/verification.md`](../verification.md) | Every technical claim with deep links to the source page/line |
 | [`docs/plans/generator-ci-plan.md`](../plans/generator-ci-plan.md) | Plan: FOM XML → `.proto` generator and PR-opening GitHub Action. Approved 2026-11-17; decisions in §9 |
 | [`docs/examples/reference_frame.proto`](../examples/reference_frame.proto) | Hand-written, verified example; compiles with `protoc` |

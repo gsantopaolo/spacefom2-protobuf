@@ -37,7 +37,7 @@ Every FOM module carries SISO's copyright notice with two grants: "Schema and AP
 The schema uses the Protobuf package `siso.spacefom.v1`. The samples use `org.siso.spacefom.v1` for Java and `Siso.Spacefom.V1` for C# as placeholders; SISO has not approved them. Which names should be used per language, and how should releases of the `.proto` files line up with SpaceFOM versions?
 
 **Q7. Would SISO or the PDG host the repositories?**
-Today the schema, generator, CI and samples in six languages live in one personal repository. The [reference repository proposal](reference-repository.md) recommends keeping it that way during discussion and, if the PDG adopts the schema, moving to repositories in an organisation SISO or the PDG controls, with admin rights handed over. Would the PDG want to host them, and is there already an organisation or place where SISO publishes material like this?
+Today the schema, generator, CI and samples in six languages live in one personal repository. The [reference repository proposal](reference-repository.md) recommends keeping it that way during discussion and, if the PDG adopts the schema, moving to repositories in an organisation SISO or the PDG controls, with admin rights handed over. Would the PDG want to host them, and is there already an organisation or place where SISO publishes material like this? And who should review and merge changes to the schema once it is hosted there?
 
 ## Demo
 

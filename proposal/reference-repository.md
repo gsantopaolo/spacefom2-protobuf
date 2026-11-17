@@ -2,9 +2,9 @@
 
 **Proposed by** Gian Paolo Santopaolo · 17 November 2026 · for the SISO SpaceFOM 2.0 PDG, as a follow-up to the [one-page pitch](pitch.md)
 
-## Question for the PDG
+## Purpose
 
-If the PDG adopts the Protobuf schema, where should the schema, the generator and the multi-language samples live, and who maintains them?
+Background for [Q7 in the open questions](open-questions.md#naming-and-hosting): where the schema, the generator and the multi-language samples should live if the PDG adopts them, and who maintains them.
 
 ## What exists today
 
@@ -32,10 +32,6 @@ Google's public APIs are organised this way: the `.proto` definitions are in [go
 
 Keep option A while the proposal is under discussion: it is faster to change, and the PDG can review one place. If the PDG adopts the schema, move to option C. I can do the split and hand over admin rights.
 
-## What the PDG would need to decide
+## Decisions needed
 
-1. Whether SISO or the PDG wants to host the repositories, and under which organisation.
-2. Which licence applies. The generated files carry SISO's attribution, "Reprinted with permission from SISO Inc.", and the question of whether `<semantics>` text counts as Schema or Documentation is still open (see [open questions, Q5](open-questions.md#sources-and-licence)).
-3. Which FOM XML source is authoritative for SpaceFOM 2.0 drafts, so CI can pin it.
-4. Who reviews and merges schema changes, and how schema releases line up with SpaceFOM versions.
-5. The official package and namespace names per language (Java, C#, Go), if any.
+The decisions this depends on (hosting, licence, authoritative FOM source, package names, review and release process) are Q4 to Q7 in the [open questions](open-questions.md).

@@ -10,12 +10,11 @@ Companion to the [one-page pitch](../../proposal/pitch.md). It explains how the 
 - [What happens to one update](#what-happens-to-one-update)
 - [Keeping the schema wire-compatible](#keeping-the-schema-wire-compatible)
 - [What is built and what is planned](#what-is-built-and-what-is-planned)
-- [Questions for the PDG](#questions-for-the-pdg)
 - [Diagram sources](#diagram-sources)
 
 ## The ask
 
-Publish, alongside the SpaceFOM 2.0 FOM modules, a Protocol Buffers schema of the SpaceFOM datatypes and object classes, generated from the FOM XML. HLA stays the exchange mechanism inside the federation. The schema lets tools outside it (Kafka, cloud pipelines, ROS 2, MBSE and data-analysis tools) read SpaceFOM data with generated code in their own language.
+Publish, alongside the SpaceFOM 2.0 FOM modules, a Protocol Buffers schema of the SpaceFOM datatypes and object classes, generated from the FOM XML. HLA stays the exchange mechanism inside the federation. The schema lets tools outside it (Kafka, cloud pipelines, ROS 2, MBSE and data-analysis tools) read SpaceFOM data with generated code in their own language. The decisions this needs from the PDG are in [open questions](../../proposal/open-questions.md).
 
 ## Architecture
 
@@ -58,10 +57,6 @@ Protobuf identifies fields by number, so a published number must never change or
 | Samples: generated code and a reader in C++, Python, Java, C#, TypeScript and Go | In progress |
 | Bridge federate | Planned |
 | Docker Compose demo: RTI, simulated federates, bridge, Kafka and non-HLA consumers | Planned; scenario and RTI depend on the PDG ([Q8](../../proposal/open-questions.md#demo)) |
-
-## Questions for the PDG
-
-All questions for the PDG are in one file, [open questions](../../proposal/open-questions.md): the PCR form, scope and status of the mapping, the authoritative FOM XML, the licence of the `<semantics>` text, package names, repository hosting and the demo.
 
 ## Diagram sources
 
