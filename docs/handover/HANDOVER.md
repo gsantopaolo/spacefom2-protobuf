@@ -30,7 +30,7 @@ These come from the repo owner and are mandatory.
 5. **No NASA or SISO logos** anywhere: NASA's insignia requires written permission, SISO's logo is a trademark. Keep the "not affiliated or endorsed" disclaimer in the README.
 6. **SISO attribution.** Anything derived from the FOM modules (including generated `.proto` files) must carry: "Reprinted with permission from SISO Inc." (licence notice inside every FOM XML file).
 7. **Run every new or edited document through the humanizer skill** ([blader/humanizer](https://github.com/blader/humanizer), `SKILL.md` installed in `~/.claude/skills/humanizer/`) in file mode: prose only, keeping code, links, citations and facts unchanged.
-8. **Questions for the PDG vice chair are batched**, never sent piecemeal: add them to `reference-docs/questions-for-alfredo.md` (local, git-excluded, in Italian). The owner sends them all at once.
+8. **Questions for the PDG vice chair are batched**, never sent piecemeal: add them to [`proposal/open-questions.md`](../../proposal/open-questions.md), with the context needed to answer them. The owner sends the file to the vice chair when the batch is ready.
 
 ## Implementation brief
 
@@ -52,7 +52,7 @@ Phases 1 to 5 of the plan's §8: parser and model, mapping and emitter, inherita
 - Commit in small steps, one plan phase at a time if possible.
 - Open one pull request to `main` when the definition of done below is met. In the PR description, list each plan decision you implemented, anything you could not verify, and anything you changed from the plan and why.
 - Do not change repository settings, secrets or visibility. If something needs a setting (for example "Allow GitHub Actions to create and approve pull requests"), write it in the PR description for the owner.
-- Questions for the owner go in the PR description or as PR comments. Questions for the PDG go in `reference-docs/questions-for-alfredo.md` (rule 8).
+- Questions for the owner go in the PR description or as PR comments. Questions for the PDG go in `proposal/open-questions.md` (rule 8).
 
 ### Definition of done
 
@@ -80,7 +80,7 @@ The repo owner will ask a Claude Code session to review the PR against the plan 
 | [`docs/plans/generator-ci-plan.md`](../plans/generator-ci-plan.md) | Plan: FOM XML → `.proto` generator and PR-opening GitHub Action. Approved 2026-11-17; decisions in §9 |
 | [`docs/examples/reference_frame.proto`](../examples/reference_frame.proto) | Hand-written, verified example; compiles with `protoc` |
 | [`docs/images/bridge-architecture.svg`](../images/bridge-architecture.svg) | Architecture diagram used in README, pitch and overview |
-| `reference-docs/` (local only) | `standards/` (SISO-STD-018-2020 PDF, FOM XML from nasa/TrickHLA, HLA 4 summary paper, `SOURCES.md`), `process/` (SISO-ADM-003, SIW 2025 paper), `presentations/` (SIMposium 2026 slides), `fp-verification/` (Federate Protocol `.proto` sources), `questions-for-alfredo.md`, private notes |
+| `reference-docs/` (local only) | `standards/` (SISO-STD-018-2020 PDF, FOM XML from nasa/TrickHLA, HLA 4 summary paper, `SOURCES.md`), `process/` (SISO-ADM-003, SIW 2025 paper), `presentations/` (SIMposium 2026 slides), `fp-verification/` (Federate Protocol `.proto` sources), private notes |
 
 Repository: `git@github.com:gsantopaolo/spacefom2-protobuf.git`, branch `main`, currently **private**. MIT licence.
 

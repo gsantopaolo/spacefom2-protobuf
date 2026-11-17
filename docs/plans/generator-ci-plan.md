@@ -184,7 +184,7 @@ Answered by the repo owner on 2026-11-17.
 | D7 | Scheduled upstream check | Not now. Triggers are `workflow_dispatch`, `push` and `pull_request` only |
 | D8 | Token | `GITHUB_TOKEN`. All validation runs inside the generator job. The owner enables "Allow GitHub Actions to create and approve pull requests" in the repo settings |
 
-For §7 open point (a), the generator copies `<semantics>` text verbatim into comments behind a flag that is on by default. If SISO classes the text as "Documentation" (non-commercial only), we regenerate with the flag off. The question is listed for the PDG in [`technical-overview.md`, Open questions for the PDG](../technical-overview.md#open-questions-for-the-pdg).
+For §7 open point (a), the generator copies `<semantics>` text verbatim into comments behind a flag that is on by default. If SISO classes the text as "Documentation" (non-commercial only), we regenerate with the flag off. The question is listed for the PDG in [open questions, Q5](../../proposal/open-questions.md#sources-and-licence).
 
 ## Sources
 

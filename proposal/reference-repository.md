@@ -35,7 +35,7 @@ Keep option A while the proposal is under discussion: it is faster to change, an
 ## What the PDG would need to decide
 
 1. Whether SISO or the PDG wants to host the repositories, and under which organisation.
-2. Which licence applies. The generated files carry SISO's attribution, "Reprinted with permission from SISO Inc.", and the question of whether `<semantics>` text counts as Schema or Documentation is still open (see [open questions](../docs/technical-overview.md#open-questions-for-the-pdg)).
+2. Which licence applies. The generated files carry SISO's attribution, "Reprinted with permission from SISO Inc.", and the question of whether `<semantics>` text counts as Schema or Documentation is still open (see [open questions, Q5](open-questions.md#sources-and-licence)).
 3. Which FOM XML source is authoritative for SpaceFOM 2.0 drafts, so CI can pin it.
 4. Who reviews and merges schema changes, and how schema releases line up with SpaceFOM versions.
 5. The official package and namespace names per language (Java, C#, Go), if any.

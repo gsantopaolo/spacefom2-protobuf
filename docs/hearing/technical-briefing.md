@@ -57,11 +57,11 @@ Protobuf identifies fields by number, so a published number must never change or
 | CI workflow: check on pull requests, regenerate and open a PR on `main` | Done; the PR-opening step has not run for real yet ([#5](https://github.com/gsantopaolo/spacefom2-protobuf/issues/5)) |
 | Samples: generated code and a reader in C++, Python, Java, C#, TypeScript and Go | In progress |
 | Bridge federate | Planned |
-| Docker Compose demo: RTI, simulated federates, bridge, Kafka and non-HLA consumers | Planned; scenario and RTI depend on the PDG ([question 5](../technical-overview.md#open-questions-for-the-pdg)) |
+| Docker Compose demo: RTI, simulated federates, bridge, Kafka and non-HLA consumers | Planned; scenario and RTI depend on the PDG ([Q8](../../proposal/open-questions.md#demo)) |
 
 ## Questions for the PDG
 
-The open questions are kept in one place, the [technical overview](../technical-overview.md#open-questions-for-the-pdg): scope of the mapping, informative or normative status, package naming, the licence of the `<semantics>` text, and the demo scenario and RTI. Where the repositories should live is covered in the [reference repository proposal](../../proposal/reference-repository.md).
+All questions for the PDG are in one file, [open questions](../../proposal/open-questions.md): the PCR form, scope and status of the mapping, the authoritative FOM XML, the licence of the `<semantics>` text, package names, repository hosting and the demo.
 
 ## Diagram sources
 
