@@ -65,10 +65,10 @@ docs/       technical overview, verification, diagrams, example .proto
 
 ## Disclaimer
 
-Independent proposal by [Gianpaolo Santopaolo](https://github.com/gsantopaolo). Not affiliated with, endorsed by, or an official product of SISO, NASA or any other organization. SpaceFOM and SISO-STD-018-2020 are © SISO; this repository does not reproduce the standard and refers to it by clause.
+Independent proposal by [Gian Paolo Santopaolo](https://github.com/gsantopaolo). Not affiliated with, endorsed by, or an official product of SISO, NASA or any other organization. SpaceFOM and SISO-STD-018-2020 are © SISO; this repository does not reproduce the standard and refers to it by clause.
 
 Prepared with Claude (Anthropic) as a research and drafting aid; every technical fact was checked against the primary sources listed in [verification](docs/verification.md).
 
 ## License
 
-[MIT](LICENSE) © 2026 Gianpaolo Santopaolo
+[MIT](LICENSE) © 2026 Gian Paolo Santopaolo

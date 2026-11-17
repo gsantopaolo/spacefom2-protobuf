@@ -1,6 +1,6 @@
 # SpaceFOM 2.0: a Protobuf schema for the SpaceFOM datatypes
 
-**Proposed by** Gianpaolo Santopaolo · 17 November 2026 · for the SISO SpaceFOM 2.0 PDG
+**Proposed by** Gian Paolo Santopaolo · 17 November 2026 · for the SISO SpaceFOM 2.0 PDG
 
 ## Problem
 
@@ -26,6 +26,6 @@ HLA is not replaced: roles, synchronization and time management stay in HLA, whi
 
 ## Who proposes it
 
-**Gianpaolo Santopaolo**, Senior AI/ML Engineer at Alloy Therapeutics (Lugano, Switzerland), a position reached through experience rather than a formal engineering degree. More than 20 years architecting and implementing highly available, highly scalable, distributed real-time systems worldwide; long-time Protocol Buffers user and speaker; Microsoft Regional Director (2 years) and Microsoft MVP (10 years). Available to present the idea with a working demo and to act as lead analyst for the PCR.
+**Gian Paolo Santopaolo**, Senior AI/ML Engineer at Alloy Therapeutics (Basel, Switzerland), a position reached through experience rather than a formal engineering degree, where he leads the design and deployment of conversational and agentic AI systems that let scientists work with proprietary research data. More than 20 years architecting and implementing highly available, highly scalable, distributed real-time systems worldwide; long-time Protocol Buffers user and speaker; Microsoft Regional Director (2 years) and Microsoft MVP (10 years). Available to present the idea with a working demo and to act as lead analyst for the PCR.
 
 <sub>Prepared with Claude (Anthropic) as a research and drafting aid; every technical fact was checked against SISO-STD-018-2020 and the SpaceFOM FOM XML. I reviewed it and stand behind it. Details: [technical overview](../docs/technical-overview.md) · [draft PCR](pcr-draft.md).</sub>
