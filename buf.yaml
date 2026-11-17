@@ -1,0 +1,17 @@
+# buf v2 configuration: https://buf.build/docs/configuration/v2/buf-yaml/
+# Only proto/ is a module, so history/ and docs/examples/ are never linted or
+# checked for breaking changes.
+version: v2
+modules:
+  - path: proto
+lint:
+  use:
+    - STANDARD
+  except:
+    # The generator keeps the FOM's enum value names (EXEC_MODE_*, MTR_*).
+    # Plan decision D4.
+    - ENUM_VALUE_PREFIX
+    - ENUM_ZERO_VALUE_SUFFIX
+breaking:
+  use:
+    - WIRE
