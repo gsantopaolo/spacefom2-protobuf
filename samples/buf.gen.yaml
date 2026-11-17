@@ -1,0 +1,36 @@
+# Generates the sample bindings from proto/ (run from the repository root):
+#   buf generate --template samples/buf.gen.yaml
+# Reference: https://buf.build/docs/configuration/v2/buf-gen-yaml/
+version: v2
+clean: true
+managed:
+  # Managed mode sets per-language options at generation time, so the
+  # generated .proto files stay free of language-specific options.
+  enabled: true
+  override:
+    # org.siso.spacefom.v1 is a placeholder until SISO agrees on a name
+    # (proposal/reference-repository.md).
+    - file_option: java_package_prefix
+      value: org
+    - file_option: go_package_prefix
+      value: github.com/gsantopaolo/spacefom2-protobuf/samples/generated/go
+plugins:
+  - protoc_builtin: cpp
+    out: samples/generated/cpp
+  - protoc_builtin: java
+    out: samples/generated/java
+  - protoc_builtin: csharp
+    out: samples/generated/csharp
+  - protoc_builtin: python
+    out: samples/generated/python
+  - protoc_builtin: pyi
+    out: samples/generated/python
+  - local: samples/node_modules/.bin/protoc-gen-es
+    out: samples/generated/typescript
+    opt:
+      - target=js+dts
+      - import_extension=js
+  - local: protoc-gen-go
+    out: samples/generated/go
+    opt:
+      - paths=source_relative

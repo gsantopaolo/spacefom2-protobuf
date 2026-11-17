@@ -1,0 +1,7 @@
+{
+  "root_frame_name": "RootFrame",
+  "current_execution_mode": "EXEC_MODE_RUNNING",
+  "next_execution_mode": "EXEC_MODE_FREEZE",
+  "next_mode_scenario_time": 100.0,
+  "least_common_time_step": "250000"
+}

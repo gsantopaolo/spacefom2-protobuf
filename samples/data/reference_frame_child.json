@@ -1,0 +1,23 @@
+{
+  "name": "EarthFrame",
+  "parent_name": "RootFrame",
+  "state": {
+    "translational_state": {
+      "position": {
+        "x": 149597870000.0
+      },
+      "velocity": {
+        "y": 29780.0
+      }
+    },
+    "rotational_state": {
+      "attitude_quaternion": {
+        "scalar": 1.0
+      },
+      "angular_velocity": {
+        "z": 7.2921159e-05
+      }
+    },
+    "time": 1.5
+  }
+}

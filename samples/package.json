@@ -1,0 +1,18 @@
+{
+  "name": "spacefom-samples",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "reader": "node typescript/reader.ts",
+    "typecheck": "tsc -p typescript/tsconfig.json",
+    "test": "node --test typescript/reader.test.ts"
+  },
+  "dependencies": {
+    "@bufbuild/protobuf": "2.17.0"
+  },
+  "devDependencies": {
+    "@bufbuild/protoc-gen-es": "2.17.0",
+    "@types/node": "26.6.6",
+    "typescript": "7.0.2"
+  }
+}
