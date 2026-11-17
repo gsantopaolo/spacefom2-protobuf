@@ -12,7 +12,9 @@ on:
         type: boolean
         default: false
   push:
-    # On main this opens the update PR; on any other branch it is a dry run.
+    # Opens the update PR. Other branches are checked by the pull_request run
+    # below, or by hand with workflow_dispatch and dry_run.
+    branches: [main]
     paths:
       - proto/**
       - samples/**
