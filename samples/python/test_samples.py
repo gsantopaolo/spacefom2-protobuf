@@ -47,6 +47,16 @@ def fill(message):
             setattr(message, field.name, scalar_value(field))
 
 
+def test_every_generated_file_has_the_siso_attribution():
+    sys.path.insert(0, str(HERE.parent))
+    import attribution
+
+    files = attribution.files()
+    assert len(files) == 74
+    missing = [str(p) for p in files if attribution.ATTRIBUTION not in p.read_text(encoding="utf-8")]
+    assert not missing
+
+
 def test_fixture_values():
     assert reader.verify() == 5
 

@@ -1,3 +1,5 @@
+# Derived from the SISO-STD-018-2020 (SpaceFOM) FOM modules.
+# Reprinted with permission from SISO Inc.
 from siso.spacefom.v1 import datatypes_pb2 as _datatypes_pb2
 from google.protobuf import descriptor as _descriptor
 from google.protobuf import message as _message
