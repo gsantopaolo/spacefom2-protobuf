@@ -60,7 +60,7 @@ Two Claude Code sessions work on this repository, both pushing as the `gsantopao
 | [`docs/guides/testing-guide.md`](../guides/testing-guide.md) | Step-by-step testing: the `spacefom2` conda environment and local tests, a dry run from the GitHub Actions UI, and the full bot-PR flow in the web UI |
 | [`docs/technical-overview.md`](../technical-overview.md) | HLA → Protobuf mapping, field numbering, SpaceFOM 2.0 changes |
 | [`docs/verification.md`](../verification.md) | Every technical claim with a deep link to its source |
-| [`docs/plans/`](../plans/) | `generator-ci-plan.md` (approved, built), `samples-plan.md` (approved, built), `docker-demo-plan.md` (draft: decisions E1–E6 open) |
+| [`docs/plans/`](../plans/) | `generator-ci-plan.md` (approved, built), `samples-plan.md` (approved, built), `docker-demo-plan.md` (draft: decisions E1–E7 open) |
 | `fom/SOURCE.json` | Pinned nasa/TrickHLA commit and sha256 of each SpaceFOM 1.0 FOM module |
 | `generator/` | FOM XML to `.proto` generator, tests, `field-ids.lock.json` (stable field numbers, written by the generator) and `field-renames.json` (renames, edited by reviewers) |
 | `proto/siso/spacefom/v1/` | Generated schema, one file per FOM module |
@@ -96,7 +96,7 @@ This whole path was tested end to end on 17 November 2026 with a generator versi
 
 | Item | Owner | Notes |
 |---|---|---|
-| Docker demo plan: answer E1–E6 | Owner | [`docs/plans/docker-demo-plan.md`](../plans/docker-demo-plan.md). Nothing is built until it is marked approved |
+| Docker demo plan: answer E1–E7 | Owner | [`docs/plans/docker-demo-plan.md`](../plans/docker-demo-plan.md). Nothing is built until it is marked approved |
 | Bridge federate and Docker demo | Implementation session, after approval | Then link the prototype in the pitch's Implementation status |
 | Send the vice chair the pitch, the briefing and the open questions | Owner | Draft message in `reference-docs/` |
 | Optional: dark-mode version of the diagrams | Either session | They have a white background |
