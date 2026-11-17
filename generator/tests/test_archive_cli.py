@@ -1,3 +1,4 @@
+import hashlib
 import json
 import shutil
 from datetime import datetime, timezone
@@ -28,7 +29,6 @@ def test_cli_check_and_write(tmp_path, capsys):
     fom = tmp_path / "fom"
     fom.mkdir()
     path = write_module(fom, "datatypes", "<dataTypes/>")
-    import hashlib
     source = tmp_path / "SOURCE.json"
     source.write_text(json.dumps({"files": [
         {"name": path.name, "sha256": hashlib.sha256(path.read_bytes()).hexdigest()}]}))
