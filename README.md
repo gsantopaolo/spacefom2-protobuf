@@ -27,6 +27,7 @@ Federation roles, synchronization and time management stay in HLA; the schema is
 |---|---|
 | **[One-page pitch](proposal/pitch.md)** | Problem, solution, expected benefits, proposer: the summary for the SpaceFOM 2.0 PDG |
 | [Draft PCR](proposal/pcr-draft.md) | The proposal on the SISO Problem/Change Request form (SISO-ADM-003, Appendix A) |
+| [Technical briefing for the hearing](docs/hearing/technical-briefing.md) | How the proposal works, with diagrams: architecture, generator pipeline, the path of one update, field numbering |
 | [Reference repository proposal](proposal/reference-repository.md) | Where the schema, generator and multi-language samples should live if the PDG adopts them: options and the decisions needed |
 | [Technical overview](docs/technical-overview.md) | HLA-to-Protobuf mapping, example `.proto`, architecture, open questions |
 | [Verification](docs/verification.md) | Every technical claim, with the clause of the standard it was checked against |
@@ -57,7 +58,7 @@ message ReferenceFrame {
 - [x] FOM XML → `.proto` generator, with CI
 - [ ] Bridge federate: HLA updates → Protobuf → Kafka / gRPC
 - [ ] Docker Compose demo: sample federation, bridge and non-HLA consumers
-- [ ] Technical documentation and diagrams for the PDG hearing
+- [ ] Technical documentation and diagrams for the PDG hearing (first version: [technical briefing](docs/hearing/technical-briefing.md))
 
 ## Generating the schema
 
