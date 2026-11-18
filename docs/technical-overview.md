@@ -45,7 +45,7 @@ Aggregates are `HLAfixedArray` (3-vectors and 3×3 matrices, Table C-3) and `HLA
 | HLA OMT construct | Protobuf | Notes |
 |---|---|---|
 | `HLAfloat64LE` simple datatype | `double` | Unit from the FOM `<units>` element, copied as a comment |
-| `HLAinteger64Time` | `int64` | SpaceFOM 1.0: microseconds since the start of the federation execution (FOM `<time>` semantics); configurable resolution in 2.0 |
+| `HLAinteger64Time` | `int64` | SpaceFOM 1.0: microseconds since the start of the federation execution (FOM `<time>` semantics); configurable resolution in 2.0. Time stamp, time tag and their epochs: [time in SpaceFOM data](time.md) |
 | `HLAinteger16LE` enumeration | `enum` | Enumerator names and values kept as in the FOM. proto3 needs a first value of zero, so an enumeration without one gets `<NAME>_UNSPECIFIED = 0` (`MTRMode` starts at 2 and gets `MTR_MODE_UNSPECIFIED`) |
 | `HLAunicodeString` | `string` | |
 | `HLAfixedArray`, cardinality 3 | message with `x`, `y`, `z` | One message per named array type (`PositionVector`, `VelocityVector`, …), so types stay distinct |
@@ -76,7 +76,7 @@ The generated files are in [`proto/siso/spacefom/v1/`](../proto/siso/spacefom/v1
 
 ## What the schema does not carry
 
-A consumer of one message cannot tell which object instance it describes, when it was produced, or whether the instance still exists. The schema has no field for the instance an update belongs to, for its HLA time stamp, or for the removal of an instance. `name` does not fill the gap: in the FOM it is a Static attribute ([`SISO_SpaceFOM_entity.xml` L74–76](https://github.com/nasa/TrickHLA/blob/ed05f1b2f0bada22fffe12c1d5d5b551bbcfa91b/FOMs/SpaceFOM/SISO_SpaceFOM_entity.xml#L74-L76)), so a partial update does not carry it. Whether the answer is an envelope message around each update or a bridge that always sends full state is [open question Q9](../proposal/open-questions.md#schema-design).
+A consumer of one message cannot tell which object instance it describes, when it was produced, or whether the instance still exists. The schema has no field for the instance an update belongs to, for its HLA time stamp, or for the removal of an instance. `name` does not fill the gap: in the FOM it is a Static attribute ([`SISO_SpaceFOM_entity.xml` L74–76](https://github.com/nasa/TrickHLA/blob/ed05f1b2f0bada22fffe12c1d5d5b551bbcfa91b/FOMs/SpaceFOM/SISO_SpaceFOM_entity.xml#L74-L76)), so a partial update does not carry it. Whether the answer is an envelope message around each update or a bridge that always sends full state is [open question Q9](../proposal/open-questions.md#schema-design). Which times the schema carries and which it lacks is in [time in SpaceFOM data](time.md).
 
 ## SpaceFOM 2.0 changes the generator must follow
 

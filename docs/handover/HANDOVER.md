@@ -59,6 +59,7 @@ Two Claude Code sessions work on this repository, both pushing as the `gsantopao
 | [`docs/hearing/technical-briefing.md`](../hearing/technical-briefing.md) | Briefing for the PDG hearing, with draw.io diagrams in [`docs/diagrams/`](../diagrams/) (sources and GIFs; `export.sh` regenerates them) |
 | [`docs/guides/testing-guide.md`](../guides/testing-guide.md) | Step-by-step testing: the `spacefom2` conda environment and local tests, a dry run from the GitHub Actions UI, and the full bot-PR flow in the web UI |
 | [`docs/technical-overview.md`](../technical-overview.md) | HLA → Protobuf mapping, field numbering, SpaceFOM 2.0 changes |
+| [`docs/time.md`](../time.md) | Time stamp, time tag and CTE time; bridge time management (open questions Q12, Q13) |
 | [`docs/verification.md`](../verification.md) | Every technical claim with a deep link to its source |
 | [`docs/plans/`](../plans/) | `generator-ci-plan.md` (approved, built), `samples-plan.md` (approved, built), `docker-demo-plan.md` (draft: decisions E1–E7 open) |
 | `fom/SOURCE.json` | Pinned nasa/TrickHLA commit and sha256 of each SpaceFOM 1.0 FOM module |
