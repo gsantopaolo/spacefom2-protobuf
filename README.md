@@ -32,6 +32,7 @@ Federation roles, synchronization and time management stay in HLA; the schema is
 | [Reference repository proposal](proposal/reference-repository.md) | Where the schema, generator and multi-language samples should live if the PDG adopts them: options and the decisions needed |
 | [Technical overview](docs/technical-overview.md) | HLA-to-Protobuf mapping, example `.proto`, architecture |
 | [Testing guide](docs/guides/testing-guide.md) | Step by step: create the conda environment, test the generator locally, then test the automation in the GitHub web UI |
+| [Time in SpaceFOM data](docs/time.md) | Time stamp, time tag and CTE time; what the schema carries; how the bridge handles HLA time management |
 | [Verification](docs/verification.md) | Every technical claim, with the clause of the standard it was checked against |
 | [Generator and CI plan](docs/plans/generator-ci-plan.md) | Approved plan for the FOM XML → `.proto` generator and the GitHub Action that opens update PRs |
 | [Generated schema](proto/siso/spacefom/v1/) | The `.proto` files generated from the SpaceFOM 1.0 FOM modules, package `siso.spacefom.v1` |

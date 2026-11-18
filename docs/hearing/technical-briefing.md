@@ -41,6 +41,8 @@ From the SpaceFOM 1.0 modules the generator produces four files (`datatypes`, `e
 
 Even with HLA 4's Federate Protocol, which defines its services in Protobuf, each attribute value is carried as an opaque `bytes` field holding HLA-encoded data (`AttributeHandleValue.value` in the Federate Protocol `datatypes.proto`). A tool that reads those bytes still needs the FOM and an HLA decoder. The bridge does that decoding once, so consumers don't have to.
 
+The TT time tag is inside every state, so it reaches the consumer bit for bit. The bridge is time constrained, so it receives each update's HLA time stamp in order, but not time regulating, so it cannot slow the federation. Where the schema puts the time stamp is still open. Details and the open points (Q9, Q12, Q13): [time in SpaceFOM data](../time.md).
+
 ## Keeping the schema wire-compatible
 
 ![Field-number lifecycle: first run, attribute added, removed, renamed](../diagrams/field-numbering.gif)

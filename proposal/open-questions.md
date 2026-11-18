@@ -10,6 +10,7 @@ The decisions this proposal needs from the PDG. Answers will be recorded here as
 - [Naming and hosting](#naming-and-hosting)
 - [Demo](#demo)
 - [Schema design](#schema-design)
+- [Time](#time)
 
 ## Process
 
@@ -53,10 +54,20 @@ The roadmap ends with a Docker Compose demo that runs a whole SpaceFOM federatio
 ## Schema design
 
 **Q9. How does a consumer know which object instance an update belongs to, and when it happened?**
-Each object class maps to a message whose fields are all optional, and a partial attribute update maps to a partial message ([mapping](../docs/technical-overview.md#mapping)). The schema has no place for the object instance an update belongs to, its HLA time stamp, or the removal of an instance. The `name` attribute does not fill the gap: it is Static ([`SISO_SpaceFOM_entity.xml` L74–76](https://github.com/nasa/TrickHLA/blob/ed05f1b2f0bada22fffe12c1d5d5b551bbcfa91b/FOMs/SpaceFOM/SISO_SpaceFOM_entity.xml#L74-L76)), so a partial update does not carry it. One option is an envelope message around each update, with the instance name, the object class, the HLA logical time and a marker for a removed instance. Another is a bridge that caches the last value of every attribute and always sends the full state; that carries `name`, but still not the time stamp or the removal. Which does the PDG prefer, or is there a better way?
+Each object class maps to a message whose fields are all optional, and a partial attribute update maps to a partial message ([mapping](../docs/technical-overview.md#mapping)). The schema has no place for the object instance an update belongs to, its HLA time stamp, or the removal of an instance. The `name` attribute does not fill the gap: it is Static ([`SISO_SpaceFOM_entity.xml` L74–76](https://github.com/nasa/TrickHLA/blob/ed05f1b2f0bada22fffe12c1d5d5b551bbcfa91b/FOMs/SpaceFOM/SISO_SpaceFOM_entity.xml#L74-L76)), so a partial update does not carry it. One option is an envelope message around each update, with the instance name, the object class, the HLA logical time and a marker for a removed instance. Another is a bridge that caches the last value of every attribute and always sends the full state; that carries `name`, but still not the time stamp or the removal. Which does the PDG prefer, or is there a better way? The time side of this question is covered in [time in SpaceFOM data](../docs/time.md).
 
 **Q10. Should each 9-element matrix type become its own message?**
 The FOM defines three `HLAfixedArray` types of 9 elements: `InertiaMatrix`, `Matrix` and `InertiaRateMatrix` (`SISO_SpaceFOM_datatypes.xml` [L266–272](https://github.com/nasa/TrickHLA/blob/ed05f1b2f0bada22fffe12c1d5d5b551bbcfa91b/FOMs/SpaceFOM/SISO_SpaceFOM_datatypes.xml#L266-L272), [L280–286](https://github.com/nasa/TrickHLA/blob/ed05f1b2f0bada22fffe12c1d5d5b551bbcfa91b/FOMs/SpaceFOM/SISO_SpaceFOM_datatypes.xml#L280-L286), [L301–307](https://github.com/nasa/TrickHLA/blob/ed05f1b2f0bada22fffe12c1d5d5b551bbcfa91b/FOMs/SpaceFOM/SISO_SpaceFOM_datatypes.xml#L301-L307)). The generator writes each attribute of these types as a `repeated double`, with the array type's semantics as a comment. In SpaceFOM 1.0 two attributes use them: `DynamicalEntity.inertia` (field 14) and `DynamicalEntity.inertia_rate` (field 15); no attribute uses `Matrix`. A message per matrix type, for example `message InertiaMatrix { repeated double elements = 1; }`, would keep the type name and give the attribute presence, which a `repeated` field cannot have. It would also change fields 14 and 15 of `DynamicalEntity` on the wire, so the choice must be made before the schema is published. Until then the generator keeps `repeated double`. Which form does the PDG prefer?
 
 **Q11. Should the schema cover FOM modules beyond the four SISO files?**
 The generator reads only the four SISO modules and rejects any file not named `SISO_SpaceFOM_<key>.xml` ([`parse.py` L26](https://github.com/gsantopaolo/spacefom2-protobuf/blob/baeda12/generator/spacefom_proto/parse.py#L26)). Projects keep much of their own data in extension modules, and a tool builder may want to run the generator on those. Should the generator and the published schema also cover such modules, or stay limited to the SISO modules (see also Q2)?
+
+## Time
+
+Background for both questions: [time in SpaceFOM data](../docs/time.md).
+
+**Q12. How should the schema state the unit and epoch of the time tag?**
+The FOM gives `Time` in seconds ([`SISO_SpaceFOM_datatypes.xml` L149–155](https://github.com/nasa/TrickHLA/blob/1677fd0e0e3ff45d6bff712169c463e38ede5586/FOMs/SpaceFOM/SISO_SpaceFOM_datatypes.xml#L149-L155)), while Rule 4-10 asks for TT "using the Truncated Julian Date (TJD) format", and TJD is defined in days (§4.3.4.2). TrickHLA sends seconds of TT since the TJD origin ([details](../docs/time.md#unit-and-epoch-of-the-time-tag)). The generated comment says only `Time: second (s)`, and the epoch is not in the schema. SpaceFOM 2.0 plans an epoch of 2000 and a configurable time resolution, after which the same `double` means something different. Should the 2.0 FOM state the epoch in the `<units>` or `<semantics>` of `Time`, so the generator can copy it, or should the schema carry it another way, for example as a custom option or in the package version?
+
+**Q13. Which HLA time management should the reference bridge use?**
+The proposed bridge is time constrained, so it receives updates in time stamp order with their time stamps (Rules 4-25 and 4-26), and not time regulating, so it cannot hold back the federation, the Pacing Federate or real-time equipment on a CTE clock (Rule 3-11) ([details](../docs/time.md#the-bridge-and-hla-time-management)). Does the PDG agree, and are there federations, for example with hardware in the loop, where a bridge would need a different setup?
